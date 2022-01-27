@@ -97,4 +97,4 @@ endpoints = lock `select` guess
 -- lastly, we gonna bind the everything to the playground via GameSchema
 mkSchemaDefinitions ''GameSchema
 
-$(mkKnownCurrencies [])
+$(mkKnownCurrencies []) 
