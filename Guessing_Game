@@ -18,7 +18,7 @@ randomNum = toInteger $ fromEnum $ C.last $ C.pack $ show $ walletPubKey $ Walle
 
 -- this magic number allows us to win the game
 magicNum :: Integer
-magicNum = 123
+magicNum = 123 
 
 -- Validator function has the format of (Datum -> Redeemer -> ValidatorCtx -> Bool) where it is computed
 -- on the chain. If we look at the ScriptInstance, this is where we define the type of the
