@@ -10,6 +10,6 @@ hello = logInfo @String "Hello, world"
 endpoints :: Contract BlockchainActions T.Text ()
 endpoints = hello
 
-mkSchemaDefinitions ''BlockchainActions
+mkSchemaDefinitions ''BlockchainActions 
 
 $(mkKnownCurrencies [])
