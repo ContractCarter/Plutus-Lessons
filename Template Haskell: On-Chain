@@ -1,19 +1,25 @@
 
-//code locks/unlocks transactions
+--| Wrap the type in generic form and give the type an object
+newtype MyDatum = MyDatum Integer deriving newtype PlutusTx.IsData
+newtype Redeemer = MyRedemmer Integer deriving newtype PlutusTx.IsData
+
+--| //code locks/unlocks transactions
 mkValidator :: MyDatum -> MyRedeemer -> ScriptContext -> Bool
 mkValidator _ _ _ = traceiffalse
 
-//Script type defines Redeemer & Datum
+--| Script type defines Redeemer & Datum
 data Typed 
   instance Scripts.ScripType Typed where
   type instance RedeemerTyped Typed = MyRedeemer
   type instance DatumType Typed = MyDatum 
   
-//Script instance is the compiled validator
-  (Ready to go on chain)
+--| Script instance is the compiled validator
+--  (Ready to go on chain)
   inst :: Scripts.ScriptInstance Typed
   inst = scripts.validator @Typed
   $$(Plutustx.compile[|| mkValidator ||])
   $$(PlutusTx.compile[|| wrap ||]) where
      wrap =Scripts.wrapValidator @MyDatum @MyRedeemer
+     
+
      
