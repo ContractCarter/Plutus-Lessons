@@ -1,0 +1,19 @@
+
+//code locks/unlocks transactions
+mkValidator :: MyDatum -> MyRedeemer -> ScriptContext -> Bool
+mkValidator _ _ _ = traceiffalse
+
+//Script type defines Redeemer & Datum
+data Typed 
+  instance Scripts.ScripType Typed where
+  type instance RedeemerTyped Typed = MyRedeemer
+  type instance DatumType Typed = MyDatum 
+  
+//Script instance is the compiled validator
+  (Ready to go on chain)
+  inst :: Scripts.ScriptInstance Typed
+  inst = scripts.validator @Typed
+  $$(Plutustx.compile[|| mkValidator ||])
+  $$(PlutusTx.compile[|| wrap ||]) where
+     wrap =Scripts.wrapValidator @MyDatum @MyRedeemer
+     
