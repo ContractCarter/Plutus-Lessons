@@ -1,8 +1,31 @@
-
+--| endpoints return a contract and a schema which is defined.
+-- every endpoint sends a transaction
 endpoints :: AsContractError e => Contract Schema e ()
 endpoints = contract
 
 contract :: AsContractError e=> Contract Schema e ()
 contract = publish 'select' redeem
 
+--| The "redeem" contract endpoint.
+redeem :: AsContractError e => Contract Schema e ()
+redeem = do
+    myRedeemerValue <- endpoint @"redeem"
+    unspentOutputs <- utxoAt contractAddress
+    let redeemer = MyRedeemer myRedeemerValue 
+        tx       = collectFromScript unspentOutputs redeemer
+    void $ submitTxConstraintsSpending starterInstance unspentOutputs tx
+    
+--| The "publish" contract endpoint.
+publish :: AsContractError e => Contract Schema e ()
+publish = do
+     (i, lockedFunds) <- endpoint @"publish"
+     let tx = Constraints.mustPayToTheScript (MyDatum i) lockedFunds
+     void $ submitTxConstraints starterInstance Tx
+     
+--| The Schema of the contract, with two endpoints.
+type Schema =
+     BlockchainActions
+          .\/ Endpoint "publish" (Integer, Value)
+          .\/ Endpoint "redeem" Integer
+        
  
