@@ -1,0 +1,8 @@
+
+endpoints :: AsContractError e => Contract Schema e ()
+endpoints = contract
+
+contract :: AsContractError e=> Contract Schema e ()
+contract = publish 'select' redeem
+
+ 
