@@ -15,23 +15,26 @@ import           Text.Printf             (printf)
 import           Wallet.Emulator.Wallet
 
 {-# INLINABLE mkPolicy #-}
+--| References the Output, Token Name
+-- Check Consumed UTXO + Check Mint "Once"
 mkPolicy :: TxOutRef -> CarterToken -> () -> ScriptContext -> Bool
 mkPolicy oref ct () ctx = traceifFalse "UTxO not consumed" hasUTxO             &&
                           traceifFalse "wrong amount minted" checkMintedAmount
   where
     info :: TxInfo
     info = scriptContextTxInfo ctx
-    
+    --| Check if Input consumes this Output
     hasUTxO :: Bool
     hasUTxO = any (\i -> txInfoOutRef i == oref) $ txInfoInputs info
     
+    --| Check TokenName + Amount minted (1)
     checkMintedAmount :: Bool
     checkMintedAmount = case flattenValue (txInfoMint info) of 
         [(_, ct' , amt)] -> ct' == ct && amt == 1
         _                -> False
-        
+  --|Compile Policy Script with 'oref' & 'ct'
   policy :: TxOutRef -> CarterToken -> Scripts.MintingPolicy
-  policy oref tn = mkMintingPolicyScripts $
+  policy oref ct = mkMintingPolicyScripts $
       $$(PlutusTx.compile [|| \oref' ct' --> Scripts.wrapMintPolicy $ mkPolicy oref' ct' ||])
       'PlutusTx.applyCode'
       PlutusTx.liftCode oref
@@ -39,8 +42,9 @@ mkPolicy oref ct () ctx = traceifFalse "UTxO not consumed" hasUTxO             &
       PlutusTx.liftCode ct
       
  curSymbol :: TxOutRef -> TokenName -> CurrencySymbol
- curSymbol oref ct = scriptCurrencySymbol $ policy oref ct
+ curSymbol oref ct = scriptCurrencySymbol $ policy oref ct]
  
+ --| Off-chain code allows endpoints to mint the NFT
  data NFTParams = NFTParama
      { npToken   :: !CarterToken
      , npAddress :: !Address
