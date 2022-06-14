@@ -51,7 +51,8 @@ mkPolicy oref tn () ctx = traceifFalse "UTxO not consumed" hasUTxO             &
      } deriving  (Generic, FromJSON, ToJSON, Show)
      
  type NFTSchema = Endpoint "mint" NFTParams 
- 
+--| Contract monad takes 4 type parameters
+-- Writer(w) Schema(s) Error (e) return (a)
  mint :: NFTParams -> Contract w NFTSchema Text ()
  mint np = do
       utxos <- utxosAt $npAddress np
