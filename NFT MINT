@@ -63,7 +63,7 @@ mkPolicy oref tn () ctx = traceifFalse "UTxO not consumed" hasUTxO             &
               let val      = Value.singleton (curSymbol oref tn) tn 1
                   lookups  = Constraints.mintingPolicy (policy oref tn) <> Constraints.unspentOutputs utxos
                   tx       = Constraints.mustMintValue val <> Constraints.mustSpendPubKeyOutput oref
-              ledgerTx <-  submitTxConstrainrsWith @Void lookups tx
+              ledgerTx <-  submitTxConstraintsWith @Void lookups tx
               void $ awaitTxConfirmed $ getCardanoTxId ledgerTx
               Contract.logInfo @String $ printf "forged %s" (show val)
   
