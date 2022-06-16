@@ -71,8 +71,17 @@ mkPolicy oref tn () ctx = traceifFalse "UTxO not consumed" hasUTxO             &
   endpoints = mint' >> endpoints
     where
        mint' = awaitPromise $ endpoint @"mint" mint
-       
+  
+--| Emulator Trace   
   test :: IO ()
   test = runEmulatorTraceIO $do
      let tn = "ABC"
          w1 = knownWallet 1
+         w2 = knownWallet 2
+      h1 <- activateContractWallet w1 endpoints
+      h2 <- activateContractWallet w2 endpoints
+      callEndpoint @"mint" h1 $ NFTParams
+          { npToken   = tn
+          , npAddress = mockWalletAddress w2
+          }
+      void $ Emulator.waitNSlots 1
