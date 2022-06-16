@@ -71,3 +71,8 @@ mkPolicy oref tn () ctx = traceifFalse "UTxO not consumed" hasUTxO             &
   endpoints = mint' >> endpoints
     where
        mint' = awaitPromise $ endpoint @"mint" mint
+       
+  test :: IO ()
+  test = runEmulatorTraceIO $do
+     let tn = "ABC"
+         w1 = knownWallet 1
