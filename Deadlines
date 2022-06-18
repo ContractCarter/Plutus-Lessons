@@ -7,3 +7,31 @@ import            Playground.Contract
 import            Plutus.Contract
 import qualified  PlutusTx
 import            PlutusTx.Prelude     hiding (Applicative (..))
+
+data VestingDatum = VestingDatum
+    { beneficiary :: PaymentPubKeyHash
+    , deadline    :: POSIXTime
+    } deriving Show
+    
+PlutusTx.unstableMakeisData "VestingDatum
+
+{-# INLINABLE mkValidator #-}
+mkValidator :: VestingDatum -> () -> ScriptContext -> Bool
+mkValidator dat () ctx = traceifFalse "beneficiary's signature missing"  signedByBeneficiary &&
+                         traceifFalse "deadline not reached" deadlineReached
+  where
+    info :: TxInfo
+    info = scriptContextTxInfo ctx
+    
+    --| True only if owner sign Public Key Hash
+    signedByBeneficiary :: Bool
+    signedByBeneficiary = txSignedBy info $unPaymentPubKeyHash $ beneficiary dat
+    
+   --| True only if current time interval contained is after deadline
+    deadlineReached :: Bool 
+    deadlineReached = contains (from $ deadline dat) $ txInfoValidRange info
+    
+data Vesting
+instance Scripts.ValidatorTypes Vesting where 
+    type instance DatumType Vesting = VestingDatum
+    type instance RedeemerType Vesting = ()
