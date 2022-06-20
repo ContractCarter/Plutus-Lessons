@@ -50,7 +50,7 @@ scrAddress :: Ledger.Address
 scrAddress = scriptAddress validator
 
 --| Off-chain 
--- fields create UTXO @ Vesting Adress with Amount & Datum
+-- Define endpoints params 
 data GiveParams = GiveParams
      { gpBeneficiary :: !PaymentPubKeyHash
      , gpDeadline    :: !POSIXTime
@@ -63,7 +63,7 @@ type vestingSchema =
             Endpoint "give" GiveParams
         .\/ Endpoint "grab" ()
         
---| 70-73 compute Datum
+--| 70-74 compute Datum
 -- 75-80 constraint a transaction has an output @ scriptaddress
 -- provide Datum & Value
 give :: AsContractError e  => GiveParams -> Contract w s e ()
@@ -80,8 +80,8 @@ give gp = do
             (show $ gpBeneficiary gp)
  
  --| 88-90Check current time, PubkeyHash, and filter only suitable utxos 
- -- 104 suitable utxos is defined with Datum & Output UTXO
- -- 105-109 Check Datum Hash & Output UTXO and get suitable UTXO
+ -- 105 suitable utxos is defined with Datum & Output UTXO
+ -- 106-110 Check Datum Hash & Output UTXO and get suitable UTXO
  -- 92-103 maping out a list of UTXOs
  
  grab :: forall w s e. AsContractError e => Contract w s e ()
