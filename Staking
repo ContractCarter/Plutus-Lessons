@@ -1,0 +1,32 @@
+module Week10.Staking 
+    { stakeValidator
+    } where
+    
+import           Ledger
+import           Ledger.Typed.Scripts         as Scripts
+import           Plutus.V1.Ledger.Ada            (Ada (..), fromValue)
+import           Plutus.V1.Ledger.Credential     (StakingCredential)
+import qualified PlutusTX
+import           PlutusTx.Prelude
+--|certify Address and reward owner
+-- Address must be paid half the total amount 
+{-# INLINABLE mkStakingValidator #-}
+mkStakingValidator :: Address -> () -> ScriptContext -> Bool
+mkStakingValidator addr () ctx = case scriptContextPurpose ctx of 
+    Certifying _   -> True 
+    Rewarding cred -> traceIfFalse "insufficient reward sharing" $ 2 * paidToAdress >= amount cred
+                   -> False
+   _
+   -| compute the amount 
+  where 
+    info :: TxInfo 
+    info  = scriptContextTxInfo ctx
+    
+    amount :: StakingCredential -> Integer
+    amount cred = go $ txInfoWdr1 info 
+      where 
+        go :: [(StakingCredential -> Integer
+        go [] = traceError "withdrawal not found"
+        go ((cred' == cred = amt) : xs)
+            |  cred' == cred = amt
+            
