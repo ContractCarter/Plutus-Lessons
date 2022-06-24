@@ -16,8 +16,8 @@ mkStakingValidator addr () ctx = case scriptContextPurpose ctx of
     Certifying _   -> True 
     Rewarding cred -> traceIfFalse "insufficient reward sharing" $ 2 * paidToAdress >= amount cred
                    -> False
-   _
-   -| compute the amount 
+   --| Get total reward through StakingCredential
+   -- compute the amount 
   where 
     info :: TxInfo 
     info  = scriptContextTxInfo ctx
@@ -31,6 +31,8 @@ mkStakingValidator addr () ctx = case scriptContextPurpose ctx of
             |  cred' == cred = amt
             |  otherwise     = go xs
             
+      --|total # of lovlace paid   
+      -- Sum up all lovelace values contained in all outputs
     paidToAddress :: Integer 
     paidToAddress = foldl f 0 $ txInfoOutputs info
       where
