@@ -17,22 +17,29 @@ mkStakingValidator addr () ctx = case scriptContextPurpose ctx of
     Rewarding cred -> traceIfFalse "insufficient reward sharing" $ 2 * paidToAdress >= amount cred
                    -> False
    --| Get total reward through StakingCredential
+   -- define info siting in scriptcontext
    -- compute the amount 
   where 
     info :: TxInfo 
     info  = scriptContextTxInfo ctx
     
+    --| define total reward amount 
+    -- helper function (go) gives a list of creds & integers
+    -- call helper function with TxInfo field (txInfoWdr1)
+    -- if empty (traceError), if cred + amt match approve
     amount :: StakingCredential -> Integer
     amount cred = go $ txInfoWdr1 info 
       where 
         go :: [(StakingCredential -> Integer
         go [] = traceError "withdrawal not found"
-        go ((cred' == cred = amt) : xs)
+        go ((cred', amt) : xs)
             |  cred' == cred = amt
             |  otherwise     = go xs
             
-      --|total # of lovlace paid   
+      --|total # of lovlace paid to address  
       -- Sum up all lovelace values contained in all outputs
+      -- fold left loops over all outputs,
+      -- extract lovelace in output to accumulator(f), current value 0
     paidToAddress :: Integer 
     paidToAddress = foldl f 0 $ txInfoOutputs info
       where
