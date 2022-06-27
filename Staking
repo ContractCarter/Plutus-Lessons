@@ -39,7 +39,8 @@ mkStakingValidator addr () ctx = case scriptContextPurpose ctx of
       --|total # of lovlace paid to address  
       -- Sum up all lovelace values contained in all outputs
       -- foldl loops over all outputs,
-      -- extract lovelace in output to accumulator(f), current value 0
+      -- extract lovelace in output to accumulator(n), current value 0
+      -- get new accumulator 49-50
     paidToAddress :: Integer 
     paidToAddress = foldl f 0 $ txInfoOutputs info
       where
