@@ -14,7 +14,7 @@ foo' x y z = readMaybe x 'bindMaybe' \k ->
               just (k + l + m)
               
               
---|Either throws an Left or Right Value 
+--|Either throws Left or Right Value 
 -- define bindEither with 2 parameters Either String a & (a -> Either String b)
 -- returns Left Error or Right function of f x value 
               
@@ -28,3 +28,23 @@ foo' x y z = readEither x 'bindEither' \k ->
              readEither z 'bindEither' \m -> 
               Right (k + l + m)
               
+             
+--| Writer is a custom data type that writes Log messages
+-- Tell helper function list strings
+
+  data Writer a = Writer a (String)
+       deriving Show 
+       
+ number :: Int -> writer Int
+ number n = Writer n $ ["number: " ++ show n}
+ 
+ tell :: [String] -> Writer ()
+ tell + Writer ()
+
+foo :: Writer Int -> Writer Int -> Writer Int -> Writer Int
+foo (Writer k xs) (Writer 1 ys) (Writer m zs) =
+   let
+     s = k + l + m
+     writer _ us = tell ["sum: " ++ show s]
+   in
+     writer s $ xs ++ ys ++ zs ++ us
