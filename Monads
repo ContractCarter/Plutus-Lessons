@@ -1,6 +1,7 @@
 
 --|Maybe throws an Exceptions can stop computation
--- define bindMaybe that 2 parameters
+-- define bindMaybe with 2 parameters Maybe a & (a -> Maybe b)
+-- returns Nothing or function of f x value 
 
 bindMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b
 bindMaybe Nothing _ = Nothing 
@@ -12,4 +13,18 @@ foo' x y z = readMaybe x 'bindMaybe' \k ->
              readMaybe z 'bindMaybe' \m -> 
               just (k + l + m)
               
+              
+--|Either throws an Left or Right Value 
+-- define bindEither with 2 parameters Either String a & (a -> Either String b)
+-- returns Left Error or Right function of f x value 
+              
+bindEither :: Either String a -> (a -> Either String b) -> Either String b
+bindEither (Left err) _ = Left err 
+bindEither (Right x) f = f x
 
+foo' :: String -> String -> String -> Either String Int
+foo' x y z = readEither x 'bindEither' \k ->
+             readEither y 'bindEither' \l ->
+             readEither z 'bindEither' \m -> 
+              Right (k + l + m)
+              
