@@ -30,7 +30,10 @@ foo' x y z = readEither x 'bindEither' \k ->
               
              
 --| Writer is a custom data type that writes Log messages
--- Tell helper function list strings
+-- (number) helper function generates writer Data type
+-- Tell helper function takes in list of strings
+-- foo takes in 3 (Writer)
+-- let defines s(sum of all) and Writer 
 
   data Writer a = Writer a (String)
        deriving Show 
@@ -39,7 +42,7 @@ foo' x y z = readEither x 'bindEither' \k ->
  number n = Writer n $ ["number: " ++ show n}
  
  tell :: [String] -> Writer ()
- tell + Writer ()
+ tell = Writer ()
 
 foo :: Writer Int -> Writer Int -> Writer Int -> Writer Int
 foo (Writer k xs) (Writer 1 ys) (Writer m zs) =
