@@ -62,3 +62,10 @@ foo (Writer k xs) (Writer 1 ys) (Writer m zs) =
      writer _ us = tell ["sum: " ++ show s]
    in
      writer s $ xs ++ ys ++ zs ++ us
+
+--| Monad abstract functions
+class Monad m where
+   (>>=) :: m a -> ( a -> mb) -> m b 
+   (>>)  :: m a -> m b        -> m b
+   return ::  a               -> m a
+   fail   :: String -> m a
