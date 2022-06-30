@@ -1,4 +1,15 @@
 
+
+-- (>>=)         :: IO a            -> (a -> IO b)             -> IO b
+-- bindMaybe     :: Maybe a         -> (a -> Maybe b)          -> Maybe b
+-- bindEither    :: Either String a -> (a -> Either String b)  -> Either
+-- bindWriter    :: Writer a        -> (a -> IO b)             -> Writer
+--
+-- return              :: a -> IO a
+-- Just                :: a -> Maybe a
+-- Right               :: a -> Either String a
+-- (\a -> Writer a []) :: a -> Writer a
+
 --|Maybe throws an Exceptions can stop computation
 -- define bindMaybe with 2 parameters Maybe a & (a -> Maybe b)
 -- returns Nothing or function of f x value 
