@@ -64,6 +64,7 @@ foo (Writer k xs) (Writer 1 ys) (Writer m zs) =
      writer s $ xs ++ ys ++ zs ++ us
 
 --| Monad abstract functions
+bind (>>=) (>>), return, fail
 class Monad m where
    (>>=) :: m a -> ( a -> mb) -> m b 
    (>>)  :: m a -> m b        -> m b
