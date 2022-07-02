@@ -6,8 +6,8 @@
 -- bindWriter    :: Writer a        -> (a -> IO b)             -> Writer
 --
 -- return              :: a -> IO a
--- Just                :: a -> Maybe a
--- Right               :: a -> Either String a
+-- Just & Nothing      :: a -> Maybe a
+-- Right & Left        :: a -> Either String a
 -- (\a -> Writer a []) :: a -> Writer a
 
 --|Maybe throws an Exceptions can stop computation
