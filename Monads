@@ -1,6 +1,6 @@
 
 
--- (>>=)         :: IO a            -> (a -> IO b)             -> IO b
+--|(>>=)         :: IO a            -> (a -> IO b)             -> IO b
 -- bindMaybe     :: Maybe a         -> (a -> Maybe b)          -> Maybe b
 -- bindEither    :: Either String a -> (a -> Either String b)  -> Either
 -- bindWriter    :: Writer a        -> (a -> IO b)             -> Writer
@@ -10,9 +10,12 @@
 -- Right & Left        :: a -> Either String a
 -- (\a -> Writer a []) :: a -> Writer a
 
+
+
+
 --|Maybe throws an Exceptions can stop computation
 -- define bindMaybe with 2 parameters Maybe a & (a -> Maybe b)
--- returns Nothing or function of f x value 
+-- returns Nothing or Just a function of f x value 
 
 bindMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b
 bindMaybe Nothing _ = Nothing 
