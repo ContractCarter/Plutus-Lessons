@@ -8,6 +8,7 @@ import           Plutus.V1.Ledger.Ada            (Ada (..), fromValue)
 import           Plutus.V1.Ledger.Credential     (StakingCredential)
 import qualified PlutusTX
 import           PlutusTx.Prelude
+
 --|certify Address and reward owner
 -- Address must be paid half the total amount 
 {-# INLINABLE mkStakingValidator #-}
