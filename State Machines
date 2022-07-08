@@ -1,2 +1,10 @@
 
  
+data Game = Game 
+    { gFirst                 ::  !
+    , gFirst                 ::  !
+    , gFirst                 ::  !
+    , gFirst                 ::  !
+    , gFirst                 ::  !
+    , gFirst                 ::  !
+    } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq)
