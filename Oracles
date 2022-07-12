@@ -65,7 +65,7 @@ mkOracleValidator oracle x r ctx =
        Nothing -> traceError "oracle input missing"
        Just i  -> txInInfoResolved i
        
- --|Check if token is present
+ --|Check if Input token is present
  -- assetClassValueOf function to look for NFT
    inputHasToken :: Bool
    inputHasToken = assetClassValueOf (txOutValue ownInput) (oracleAsset oracle) == 1
@@ -77,5 +77,11 @@ mkOracleValidator oracle x r ctx =
         [o] -> o
        _    -> traceError "expected exactly one oracle output"
        
+ 
+ --|Check if Output token is present
+ -- assetClassValueOf function to look for NFT
+   outputHasToken :: Bool
+   outputHasToken = assetClassValueOf (txOutValue ownOutput) (oracleAsset oracle) == 1
+   
     
       
