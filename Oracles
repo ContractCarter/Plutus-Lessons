@@ -1,0 +1,6 @@
+data Oracle = Oracle
+    { oSymbol   :: !CurrencySymbol
+    , oOperator :: !PubKeyHash
+    , oFee      :: !Integer
+    , oAsset    :: !AssetClass
+    } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
