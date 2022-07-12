@@ -1,6 +1,81 @@
+
+
+--| Paramaterize Oracle contract with four fields
+--  AssetClass = exchange rate against Ada (usd) 
 data Oracle = Oracle
     { oSymbol   :: !CurrencySymbol
     , oOperator :: !PubKeyHash
     , oFee      :: !Integer
     , oAsset    :: !AssetClass
     } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
+
+PlutusTx.makeLift ''Oracle 
+
+--| define redeemer
+data OracleRedeemer = Update | Use
+    deriving Show
+    
+PlutusTx.unstableMakeIsData ''OracleRedeemer
+--| helper definitions (3)
+--  define NFT asset class, oAsset 
+{-# INLINABLE oracleTokenName #-}
+oracleTokenName :: TokenName
+oracleTokenName = TokenName emptyByteString
+
+--| OracleAsset identify the NFT, Not oAsset
+{-# INLINABLE oracleAsset #-}
+oracleAsset :: Oracle -> AssetClass
+oracleAsset oracle = AssetClass (oSymbol oracle, oracleTokenName)
+
+--| Maybe Monad bind caputures effects of getting Datum Hash
+-- Output has a Datum, succeeds get Datum Hash (dh)
+-- Datum Hash turns to Datum, succeeds get d
+-- Datum (d) Maybe turns into integer
+
+{-# INLINABLE oracleValue #-}
+oracleValue :: TXOut -> (DatumHash -> Maybe Datum) -> Maybe Integer
+oracleValue o f = do
+    dh      <- txOutDatum o
+    Datum d <- f dh
+    PlutusTx.fromData d
+--| Check if Input + Oracle Output that holds the NFT
+--  Two cases (Update + Use)
+{-# INLINABLE mkOracleValidator #-}
+mkOracleValidator :: Oracle -> Integer -> OracleRedeemer -> ScriptContext -> Bool
+mkOracleValidator oracle x r ctx =
+    traceIfFalse "token missing from input"  inputHasToken &&
+    traceIfFalse "token missing from output" outputHasToken &&
+    case r of
+         Update -> traceIfFalse "operator signature missing" (txSignedBy info $ oOperator oracle) &&
+                   traceIfFalse "invalid output datum"       validOutputDatum
+         Use    -> traceIfFalse "oracle value changed"       (outputDatum == Just x)
+                   traceIfFalse "fees not paid"              feesPaid
+                   
+ --| consume Oracle Output
+ where
+   info :: TxInfo
+   info = scriptContextTxInfo ctx
+   
+ --| ownInput returns Oracle Output the script is trying to consume
+ --  findOwnInput function finds the relevant input
+ --  Nothing happens if in a different context(ex. Minting)
+--  txInInfoResolved function get TXOut from TxInfo
+   ownInput :: TxOut
+   ownInput = case findOwnInput ctx of
+       Nothing -> traceError "oracle input missing"
+       Just i  -> txInInfoResolved i
+       
+ --|Check if token is present
+ -- assetClassValueOf function to look for NFT
+   inputHasToken :: Bool
+   inputHasToken = assetClassValueOf (txOutValue ownInput) (oracleAsset oracle) == 1
+   
+   -- Find 1 Oracle Output
+   -- returns a list Oracles Outputs
+   ownOutput :: TxOut
+   ownOutput = case getContinuingOutputs ctx of
+        [o] -> o
+       _    -> traceError "expected exactly one oracle output"
+       
+    
+      
