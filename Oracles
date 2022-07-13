@@ -38,8 +38,8 @@ oracleValue o f = do
     dh      <- txOutDatum o
     Datum d <- f dh
     PlutusTx.fromData d
---| Check if Input + Oracle Output that holds the NFT
---  Two cases (Update + Use)
+--| Check if Input + Oracle Output holds the NFT
+--  Redeemer Two cases (Update + Use)
 {-# INLINABLE mkOracleValidator #-}
 mkOracleValidator :: Oracle -> Integer -> OracleRedeemer -> ScriptContext -> Bool
 mkOracleValidator oracle x r ctx =
@@ -70,7 +70,7 @@ mkOracleValidator oracle x r ctx =
    inputHasToken :: Bool
    inputHasToken = assetClassValueOf (txOutValue ownInput) (oracleAsset oracle) == 1
    
-   -- Find 1 Oracle Output
+   -- Find 1 Relevant Oracle Output
    -- returns a list Oracles Outputs
    ownOutput :: TxOut
    ownOutput = case getContinuingOutputs ctx of
@@ -83,5 +83,13 @@ mkOracleValidator oracle x r ctx =
    outputHasToken :: Bool
    outputHasToken = assetClassValueOf (txOutValue ownOutput) (oracleAsset oracle) == 1
    
+ --| Datum can arbitrarly change, still be Integer type
+ -- OracleValue finds New Output Datum 
+   outputDatum :: Maybe Integer
+   outputDatum :: oracleValue ownOutput ('findDatum' info)
+  
+  --|Check if OutputDatum has an Integer
+   validOutputDatum ::  Bool
+   validOutputDatum = isJust outputDatum
     
       
