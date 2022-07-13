@@ -17,7 +17,7 @@ data OracleRedeemer = Update | Use
     
 PlutusTx.unstableMakeIsData ''OracleRedeemer
 --| helper definitions (3)
---  define NFT asset class, oAsset 
+--  define NFT asset class, (oAsset = USD)
 {-# INLINABLE oracleTokenName #-}
 oracleTokenName :: TokenName
 oracleTokenName = TokenName emptyByteString
@@ -29,7 +29,7 @@ oracleAsset oracle = AssetClass (oSymbol oracle, oracleTokenName)
 
 --| Maybe Monad bind caputures effects of getting Datum Hash
 -- Output has a Datum, succeeds get Datum Hash (dh)
--- Datum Hash turns to Datum, succeeds get d
+-- Datum Hash turns into Datum, succeeds get d
 -- Datum (d) Maybe turns into integer
 
 {-# INLINABLE oracleValue #-}
@@ -103,6 +103,7 @@ mkOracleValidator oracle x r ctx =
       in
        outVal 'geq' (inVal <> Ada.lovelaceValueOf (oFee oracle))
        
-  data O
  data Oracling
- instance
+ instance Scripts.ScriptType Oracling where
+     type instance DatumType Oracling = Integer
+     type instance RedeemerType Oracling = OracleRedeemer
