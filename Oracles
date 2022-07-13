@@ -92,4 +92,17 @@ mkOracleValidator oracle x r ctx =
    validOutputDatum ::  Bool
    validOutputDatum = isJust outputDatum
     
-      
+  --|Check if fees are paid
+  -- Check Oracle Input + Output Values
+  -- Output Value greater or == (geq) to Input Value
+   feesPaid :: Bool
+   feesPaid =
+     let
+       inVal = txOutValue ownInput
+       outVal = txOutValue ownOutput
+      in
+       outVal 'geq' (inVal <> Ada.lovelaceValueOf (oFee oracle))
+       
+  data O
+ data Oracling
+ instance
