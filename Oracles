@@ -107,3 +107,36 @@ mkOracleValidator oracle x r ctx =
  instance Scripts.ScriptType Oracling where
      type instance DatumType Oracling = Integer
      type instance RedeemerType Oracling = OracleRedeemer
+     
+ oracleInst :: Oracle -> ScriptInstance Oracling
+ oracleInst oracle = Scripts.validator @Oracling
+     ($$(PlutusTx.compile [|| mkOracleValidator||]) 'PlutusTx.applyCode' PlutusTx.liftCode oracle)
+     $$(PlutusTx.compile [|| wrap ||])
+    where
+      wrap = Scripts.wrapValidator @Integer @OracleRedeemer
+      
+ oracleValidator :: Oracle -> Validator 
+ oracleValidator = Scripts.validatorScript . oracleInst
+ 
+ data OracleParams = OracleParams 
+     { opFees    :: !Integer
+     , opSymbol  :: !CurrencySymbol
+     , opToken   :: !TokenName
+     } deriving  (Show, Generic, FromJSON, ToJSON)
+     
+ --| Could use code in Mint Lesson to Mint NFT
+ -- Using this 
+ startOracle :: forall w s. HasBlockchainActions s => OracleParams -> Contract w s Text Oracle
+ startOracle op = do
+     pkh <- pubKeyHash <$> Contract.ownPubKey
+     osc <- mapError (pack . show) (forgetContract pkh [(oracleTokenName, 1)] :: Contract w s CurrencyError OneShotCurrency)\
+     let cs      = Currency.currencySymbol osc
+         oracle  = Oracle
+             {  oSymbol   = cs
+             ,  oOperator = pkh
+             ,  oFee      = opFees op
+             ,  oAsset    = AssetClass (opSymbol op, opToken op)
+             }
+      logInfo @String $started oracle " ++ show oracle        
+      
+ oracleValidator
