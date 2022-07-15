@@ -102,7 +102,7 @@ mkOracleValidator oracle x r ctx =
        outVal = txOutValue ownOutput
       in
        outVal 'geq' (inVal <> Ada.lovelaceValueOf (oFee oracle))
-       
+ 
  data Oracling
  instance Scripts.ScriptType Oracling where
      type instance DatumType Oracling = Integer
@@ -121,14 +121,18 @@ mkOracleValidator oracle x r ctx =
  oracleAddress :: Oracle -> Ledger.Address
  oracleAddress = scriptAddress . oracleValidator
  
+ --| Off-chain
+ -- Start the oracle, with parameters
+ -- opFees (lovelace fees), opSymbol + opToken (Exchange Rate USD)
+ 
  data OracleParams = OracleParams 
      { opFees    :: !Integer
      , opSymbol  :: !CurrencySymbol
      , opToken   :: !TokenName
      } deriving  (Show, Generic, FromJSON, ToJSON)
      
- --| Could use code in Mint Lesson to Mint NFT
- -- Using this 
+ --| Could also use code in Mint Lesson to Mint NFT
+ -- Mint NFT 
  startOracle :: forall w s. HasBlockchainActions s => OracleParams -> Contract w s Text Oracle
  startOracle op = do
      pkh <- pubKeyHash <$> Contract.ownPubKey
@@ -143,7 +147,7 @@ mkOracleValidator oracle x r ctx =
       logInfo @String $started oracle " ++ show oracle        
       return oracle
       
---| Redeemer Update the OracleValue or start first Eutxo
+--| Redeemer Case Update the OracleValue or start first UTxO
  updateOracle :: forall w s. HasBlockchainActions s => Oracle -> Integer -> Contract w s Text ()
  updateOracle oracle x = do
      m <- findOracle oracle
@@ -154,6 +158,8 @@ mkOracleValidator oracle x r ctx =
              awaitTxConfirmed $ txId ledgerTx
              logInfo @String $ "updated oracle value to " ++ show x
              
+ --| find existing oracle UTxO  
+ -- Map.filter functions shows UTxo holding the NFT
  findOracle :: forall w s. HasBlockchainActions s => Oracle -> Contract w s Text (Maybe(TxOutRef, TxOutTx, Integer))
  findOracle oracle = do
      utxos <- Map.filter f <$> utxoAt (oracleAddress oracle)
@@ -169,6 +175,9 @@ mkOracleValidator oracle x r ctx =
         
  type OracleSchema = BlockchainActions .\/ Endpoint "update" Integer
  
+ 
+ --| Combining startOracle + updateOracle into 1 contract
+ -- runOracle Loops to allow others update oracle
  runOracle :: OracleParams -> Contract (Last Oracle) OracleSchema Text ()
  runOracle op = do 
      oracle <- startOracle op
