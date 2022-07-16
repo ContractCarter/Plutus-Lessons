@@ -177,7 +177,7 @@ mkOracleValidator oracle x r ctx =
  
  
  --| Combining startOracle + updateOracle into 1 contract
- -- runOracle Loops to allow others update oracle
+ -- runOracle Loops to allow others to update Oracle's Value
  runOracle :: OracleParams -> Contract (Last Oracle) OracleSchema Text ()
  runOracle op = do 
      oracle <- startOracle op
