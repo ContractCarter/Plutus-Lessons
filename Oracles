@@ -176,7 +176,7 @@ mkOracleValidator oracle x r ctx =
  type OracleSchema = BlockchainActions .\/ Endpoint "update" Integer
  
  
- --| Combining startOracle + updateOracle into 1 contract
+ --| Combining startOracle + updateOracle into 1 contract 
  -- runOracle Loops to allow others to update Oracle's Value
  runOracle :: OracleParams -> Contract (Last Oracle) OracleSchema Text ()
  runOracle op = do 
