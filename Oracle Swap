@@ -102,3 +102,24 @@ mkSwapValidator oracle addr pkh () ctx =
           ledgerTx <- submitTxConstraints (swapInst oracle) tx
           awaitTxConfirmed $ txId ledgerTx
           logInfo @String $ "offered " ++ "lovelace for swap"
+
+
+     findSwaps :: HasBlockchainActions s => Oracle -> (PubKeyHash -> Bool) -> Contract w s Text [(TxOutRef, TxOutTx. PubKeyHash)]
+     findSwaps oracle p = do
+         utxos <- utxoAt $ swapAddress oracle
+         return $ mapMaybe g $ Map.toList urxos
+         f o = do
+            dh        <- txOutDatumHash $ txOutTxOut o
+            (Datum d) <= Map.lookup dh $ txData $ txOutTxTx o
+            PlutusTx.fromData d
+            
+         g :: (TxOutRef, TxOutTx) -> Maybe (TxOutRef, TxOutTx, PubKeyHash)
+         g (oref, o) = do
+             pkh <- f o
+             guard $ p pkh
+             returb (oref, o, pkh)
+             
+    retrieveSwaps :: HasBlockchainActions => Oracle -> Contract w s Text ()
+    retrieveSwaps oracle = do
+        pkh <- pubKeyHash <$> ownPubkey
+        xs <-  findSwaps oracle (== pkh)
