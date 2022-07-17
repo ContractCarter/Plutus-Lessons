@@ -22,13 +22,15 @@ import            Prelude              (Semigroup (..), (<$>))
 import            Week06.Oracle.Core
 import            Week06.Oracle.Funds
 
+--| price of token in USD
 {-# INLINABLE price #-}
 price :: Integer -> Integer -> Integer
 price lovelace exchangeRate = (lovelace * exchangeRate) 'divide' 1000000 
-
+--| get Ada + lovelace values
 {-# INLINABLE lovelaces #-}
 lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace . Ada.fromValue 
 
+--| Seller sells oracle data either collects USD or retrives back ownership
 {-# INLINABLE mkSwapValidator #-}
 mkSwapValidator :: Oracle -> Address -> PubKeyHash -> () -> ScriptContext -> Bool
