@@ -17,5 +17,18 @@ import            Ledger.Constraints    as Constraints
 import qualified  Ledger.Typed.Scripts  as Scripts
 import            Ledger.Ada            as Ada hiding (divide)
 import            Ledger.Value          as Value
-import            Prelude              (Semigroup (..), (<$>))r
-import
+import            Prelude              (Semigroup (..), (<$>))
+
+import            Week06.Oracle.Core
+import            Week06.Oracle.Funds
+
+{-# INLINABLE price #-}
+price :: Integer -> Integer -> Integer
+price lovelace exchangeRate = (lovelace * exchangeRate) 'divide' 1000000 
+
+{-# INLINABLE lovelaces #-}
+lovelaces :: Value -> Integer
+lovelaces = Ada.getLovelace . Ada.fromValue 
+
+{-# INLINABLE mkSwapValidator #-}
+mkSwapValidator :: Oracle -> Address -> PubKeyHash -> () -> ScriptContext -> Bool
