@@ -59,7 +59,7 @@ mkOracleValidator oracle x r ctx =
  --| ownInput returns Oracle Output the script is trying to consume
  --  findOwnInput function finds the relevant input
  --  Nothing happens if in a different context(ex. Minting)
---  txInInfoResolved function get TXOut from TxInfo
+ --  txInInfoResolved function get TXOut from TxInfo
    ownInput :: TxOut
    ownInput = case findOwnInput ctx of
        Nothing -> traceError "oracle input missing"
@@ -162,7 +162,9 @@ mkOracleValidator oracle x r ctx =
              logInfo @String $ "updated oracle value to " ++ show x
              
  --| find existing oracle UTxO  
+ -- return a tripple holding UTxO identifier (TxOutRef), UTxO data (TxOutTx), and Oracle Value (Integer)
  -- Map.filter functions shows UTxo holding the NFT
+ -- Map converts to a list of tuples
  findOracle :: forall w s. HasBlockchainActions s => Oracle -> Contract w s Text (Maybe(TxOutRef, TxOutTx, Integer))
  findOracle oracle = do
      utxos <- Map.filter f <$> utxoAt (oracleAddress oracle)
