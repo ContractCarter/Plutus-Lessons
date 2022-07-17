@@ -3,4 +3,19 @@ Module Week06.Oracle.Swap
      , swap
      ) where
      
-import     
+import            Control.Monad        hiding (fmap)
+import            Data.List            (find)
+import qualified  Data.Map             as Map
+import            Data.Maybe           (mapMaybe)
+import            Data.Monoid          (Last (..))
+import            Data.Text            (Text)
+import            Plutus.Contract       as Contract hiding (when)
+import qualified  PlutusTx
+import            PlutusTx.Prelude      hiding (Semigroup(..), (<$>), unless, mapMaybe, find)
+import            Ledger                hiding (singleton)
+import            Ledger.Constraints    as Constraints
+import qualified  Ledger.Typed.Scripts  as Scripts
+import            Ledger.Ada            as Ada hiding (divide)
+import            Ledger.Value          as Value
+import            Prelude              (Semigroup (..), (<$>))r
+import
