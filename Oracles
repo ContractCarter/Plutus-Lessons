@@ -102,6 +102,8 @@ mkOracleValidator oracle x r ctx =
        outVal = txOutValue ownOutput
       in
        outVal 'geq' (inVal <> Ada.lovelaceValueOf (oFee oracle))
+       
+ --| Pattern for Parameterized validator
  
  data Oracling
  instance Scripts.ScriptType Oracling where
@@ -132,6 +134,7 @@ mkOracleValidator oracle x r ctx =
      } deriving  (Show, Generic, FromJSON, ToJSON)
      
  --| Could also use code in Mint Lesson to Mint NFT
+ -- No initial value, it may be outdated during the Mint
  -- Mint NFT 
  startOracle :: forall w s. HasBlockchainActions s => OracleParams -> Contract w s Text Oracle
  startOracle op = do
