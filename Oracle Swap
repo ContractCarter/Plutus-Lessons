@@ -34,3 +34,71 @@ lovelaces = Ada.getLovelace . Ada.fromValue
 --| Seller sells oracle data either collects USD or retrives back ownership
 {-# INLINABLE mkSwapValidator #-}
 mkSwapValidator :: Oracle -> Address -> PubKeyHash -> () -> ScriptContext -> Bool
+mkSwapValidator oracle addr pkh () ctx =
+    txSignedBy info pkh ||
+    (traceIfFalse "expected exactly two script inputs" hasTwoScriptInputs &&
+     traceIfFalse "price not paid"                     sellerPaid)
+
+  where
+    info  :: TxInfo
+    info = scriptContextTxinfo ctx
+    
+    oracleInput :: TxOut
+    oracleInput =
+      let
+        ins = [ o
+              | i <- txInfoInputs info
+              , let o = txInInfoResolved i
+              , txOutAddress o == addr
+              ]
+      in     
+        case ins of
+             [o] -> o
+             _   -> traceError "expected exactly one oracle input"
+             
+    oracleValue' = case oracleValue oracleInput ('findDatum' info) of
+        Nothing  -> traceError "oracle value not found"
+        Just x   -> x
+        
+    hasTwoScriptInputs :: Bool
+    hasTwoScriptInputs =
+      let
+        xs = filter (isJust . toValidatorHash . txOutAddress . txInInfoResolved) $ txInfoInputs info
+      in
+        length xs == 2
+        
+     minPrice :: Integer
+     minPrice =
+       let
+         lovelaceIn = case findOwnInput ctx of
+             Nothing -> traceError "own input not found"
+             Just i  -> lovelaces $ txOutValue $ txInInfoResolved i
+         in
+           price lovelaceIn oracleValue'
+           
+      sellerPaid :: Bool
+      sellerPaid = 
+        let
+          pricePaid :: Integer
+          pricePaid =  assetClassValueOf (valuePaidTo info pkh) (oAsset oracle)
+        in
+          pricePaid >= minPrice
+          
+     data Swapping
+     instance Scripts.ScriptType Swapping where
+         type instance DatumType Swapping = PubKeyHash
+         type instance RedeemerType Swapping = ()
+         
+      swapValidator :: Oracle -> Validator
+      swapValidator = Scripts.validatorScript . swapInst
+      
+      swapAddress :: Oracle -> Ledger.Address
+      swapAddress = scriptAddress . swapValidator
+      
+      offerSwap :: forall w s. HasBlockchainActions s => Oracle -> Integer -> Contract w s Texr ()
+      offerSwap oracle amt = do
+          pkh <- pubKeyHash <$> Contract.ownPubKey
+          let tx = Constraints.mustPayToTheScript pkh $ Ada.lovelaceValueOf amt
+          ledgerTx <- submitTxConstraints (swapInst oracle) tx
+          awaitTxConfirmed $ txId ledgerTx
+          logInfo @String $ "offered " ++ "lovelace for swap"
