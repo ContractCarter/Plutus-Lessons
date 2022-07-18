@@ -26,12 +26,16 @@ import            Week06.Oracle.Funds
 {-# INLINABLE price #-}
 price :: Integer -> Integer -> Integer
 price lovelace exchangeRate = (lovelace * exchangeRate) 'divide' 1000000 
+
 --| get Ada + lovelace values
 {-# INLINABLE lovelaces #-}
 lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace . Ada.fromValue 
 
 --| Seller sells oracle data either collects USD or retrives back ownership
+-- swap transactions has 3 Inputs + 3 Outputs
+-- Check the two Inputs (source of buyer's funds and oracle current exchange rate)
+-- can retrieve ADA if seller bails (sellerPaid)
 {-# INLINABLE mkSwapValidator #-}
 mkSwapValidator :: Oracle -> Address -> PubKeyHash -> () -> ScriptContext -> Bool
 mkSwapValidator oracle addr pkh () ctx =
@@ -43,6 +47,11 @@ mkSwapValidator oracle addr pkh () ctx =
     info  :: TxInfo
     info = scriptContextTxinfo ctx
     
+    --| get UTxO from Oracle
+    -- list of all the Inputs + filter
+    -- draw list of txInfoInputs (TxInfo)
+    -- txInfoResolved turns elements to TxOut types to help match TxOutAddr to oracle
+    -- A Match or an empty String (63 - 66)
     oracleInput :: TxOut
     oracleInput =
       let
@@ -55,6 +64,7 @@ mkSwapValidator oracle addr pkh () ctx =
         case ins of
              [o] -> o
              _   -> traceError "expected exactly one oracle input"
+             
              
     oracleValue' = case oracleValue oracleInput ('findDatum' info) of
         Nothing  -> traceError "oracle value not found"
