@@ -51,7 +51,7 @@ mkSwapValidator oracle addr pkh () ctx =
     -- list of all the Inputs + filter
     -- draw list of txInfoInputs (TxInfo)
     -- txInfoResolved turns elements to TxOut types to help match TxOutAddr to oracle
-    -- A Match or an empty String (63 - 66)
+    -- A Match or an empty String (63 - 6)
     oracleInput :: TxOut
     oracleInput =
       let
