@@ -34,7 +34,7 @@ lovelaces = Ada.getLovelace . Ada.fromValue
 
 --| Seller sells oracle data either collects USD or retrives back ownership
 -- swap transactions has 3 Inputs + 3 Outputs
--- Check the two Inputs (source of buyer's funds and oracle current exchange rate)
+-- Check the two Inputs (source of buyer's funds and Swap UTxO holding lovelace)
 -- can retrieve ADA if seller bails (sellerPaid)
 {-# INLINABLE mkSwapValidator #-}
 mkSwapValidator :: Oracle -> Address -> PubKeyHash -> () -> ScriptContext -> Bool
@@ -47,7 +47,7 @@ mkSwapValidator oracle addr pkh () ctx =
     info  :: TxInfo
     info = scriptContextTxinfo ctx
     
-    --| get UTxO from Oracle
+    --| get UTxO from Input
     -- list of all the Inputs + filter
     -- draw list of txInfoInputs (TxInfo)
     -- txInfoResolved turns elements to TxOut types to help match TxOutAddr to oracle
@@ -65,11 +65,16 @@ mkSwapValidator oracle addr pkh () ctx =
              [o] -> o
              _   -> traceError "expected exactly one oracle input"
              
-             
+   --| Check current exchange rate          
     oracleValue' = case oracleValue oracleInput ('findDatum' info) of
         Nothing  -> traceError "oracle value not found"
         Just x   -> x
-        
+     
+   --| hasTwoScriptInputs helper function
+   -- filter using the composite function (isJust . toValidatorHash . txOutAddress . txInInfoResolved)
+   -- get UTxO from input, address of UTxO, Validator Hash for Address, Check if ScriptOuput or else Nothing
+   -- ^^^ Left to Right
+   -- filter against TxInInfos list
     hasTwoScriptInputs :: Bool
     hasTwoScriptInputs =
       let
