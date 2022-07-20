@@ -82,6 +82,10 @@ mkSwapValidator oracle addr pkh () ctx =
       in
         length xs == 2
         
+    --| Check seller is getting paid
+    -- create helper function to determine required price
+    -- check for input, extract # lovelaces, assign # as lovelaceIn
+    --  price (96) determine price in USD
      minPrice :: Integer
      minPrice =
        let
@@ -91,6 +95,7 @@ mkSwapValidator oracle addr pkh () ctx =
          in
            price lovelaceIn oracleValue'
            
+           
       sellerPaid :: Bool
       sellerPaid = 
         let
@@ -99,6 +104,8 @@ mkSwapValidator oracle addr pkh () ctx =
         in
           pricePaid >= minPrice
           
+          
+     --| Normal BoilerPlate code     
      data Swapping
      instance Scripts.ScriptType Swapping where
          type instance DatumType Swapping = PubKeyHash
