@@ -118,6 +118,8 @@ mkSwapValidator oracle addr pkh () ctx =
       swapAddress :: Oracle -> Ledger.Address
       swapAddress = scriptAddress . swapValidator
       
+      
+      --| seller who wants to offer a certain number of lovelace for exchange
       offerSwap :: forall w s. HasBlockchainActions s => Oracle -> Integer -> Contract w s Texr ()
       offerSwap oracle amt = do
           pkh <- pubKeyHash <$> Contract.ownPubKey
@@ -126,7 +128,7 @@ mkSwapValidator oracle addr pkh () ctx =
           awaitTxConfirmed $ txId ledgerTx
           logInfo @String $ "offered " ++ "lovelace for swap"
 
-
+--| find all swaps that satisfy a
      findSwaps :: HasBlockchainActions s => Oracle -> (PubKeyHash -> Bool) -> Contract w s Text [(TxOutRef, TxOutTx. PubKeyHash)]
      findSwaps oracle p = do
          utxos <- utxoAt $ swapAddress oracle
@@ -142,6 +144,7 @@ mkSwapValidator oracle addr pkh () ctx =
              guard $ p pkh
              returb (oref, o, pkh)
              
+ --| retrieveSwaps contract is for the seller who changes their mind and wants to retrieve Ada back            
     retrieveSwaps :: HasBlockchainActions => Oracle -> Contract w s Text ()
     retrieveSwaps oracle = do
         pkh <- pubKeyHash <$> ownPubkey
