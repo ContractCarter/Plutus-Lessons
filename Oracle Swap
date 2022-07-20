@@ -95,7 +95,8 @@ mkSwapValidator oracle addr pkh () ctx =
          in
            price lovelaceIn oracleValue'
            
-           
+    --| Check seller is getting paid
+    
       sellerPaid :: Bool
       sellerPaid = 
         let
