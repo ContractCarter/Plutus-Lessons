@@ -151,3 +151,12 @@ mkSwapValidator oracle addr pkh () ctx =
     retrieveSwaps oracle = do
         pkh <- pubKeyHash <$> ownPubkey
         xs <-  findSwaps oracle (== pkh)
+        case xs of
+        [] -> logInfo @String "no swaps found"
+        _  -> do
+            let lookups = Constraints.unspentOutputs (Map.fromList [(oref, o) | (oref, o, _) <- xs]) <>
+                          Constraints.otherScript (swapValidator oracle)
+                tx      = mconcat [Constraints.mustSpendScriptOutput oref $ Redeemer $ PlutusTx.toData () | (oref, _, _) <- xs]
+            ledgerTx <- submitTxConstraintsWith @Swapping lookups tx
+            awaitTxConfirmed $ txId ledgerTx
+            logInfo @String $ "retrieved " ++ show (length xs) ++ " swap(s)"
