@@ -120,7 +120,7 @@ mkSwapValidator oracle addr pkh () ctx =
       
       
       --| seller who wants to offer a certain number of lovelace for exchange
-      offerSwap :: forall w s. HasBlockchainActions s => Oracle -> Integer -> Contract w s Texr ()
+      offerSwap :: forall w s. HasBlockchainActions s => Oracle -> Integer -> Contract w s Text ()
       offerSwap oracle amt = do
           pkh <- pubKeyHash <$> Contract.ownPubKey
           let tx = Constraints.mustPayToTheScript pkh $ Ada.lovelaceValueOf amt
@@ -128,7 +128,8 @@ mkSwapValidator oracle addr pkh () ctx =
           awaitTxConfirmed $ txId ledgerTx
           logInfo @String $ "offered " ++ "lovelace for swap"
 
---| find all swaps that satisfy a
+--| find all swaps that satisfy a given predicate (PubKeyHash)
+-- returns a list of triples of the UTxOs that satisfy the predicate.
      findSwaps :: HasBlockchainActions s => Oracle -> (PubKeyHash -> Bool) -> Contract w s Text [(TxOutRef, TxOutTx. PubKeyHash)]
      findSwaps oracle p = do
          utxos <- utxoAt $ swapAddress oracle
@@ -144,7 +145,8 @@ mkSwapValidator oracle addr pkh () ctx =
              guard $ p pkh
              return (oref, o, pkh)
              
- --| retrieveSwaps contract is for the seller who changes their mind and wants to retrieve Ada back            
+ --| retrieveSwaps contract is for the seller who changes their mind and wants to retrieve Ada back 
+ -- Use (== pkh) as predicate, use only UTxOs sitting @ swap address belonging to operator
     retrieveSwaps :: HasBlockchainActions => Oracle -> Contract w s Text ()
     retrieveSwaps oracle = do
         pkh <- pubKeyHash <$> ownPubkey
