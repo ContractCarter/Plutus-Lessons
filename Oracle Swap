@@ -161,6 +161,8 @@ mkSwapValidator oracle addr pkh () ctx =
             awaitTxConfirmed $ txId ledgerTx
             logInfo @String $ "retrieved " ++ show (length xs) ++ " swap(s)"
             
+ --| Case redeemer "Use" from core module to be used for swap           
+            
           useSwap :: forall w s. HasBlockchainActions s => Oracle -> Contract w s Text ()
           useSwap oracle = do
             funds <- ownFunds
