@@ -169,6 +169,8 @@ mkSwapValidator oracle addr pkh () ctx =
             let amt = assetClassValueOf funds $ oAsset oracle
             logInfo @String $ "available assets: " ++ show amt
 
+
+--  Case redeemer "Use" from core module to be used for swap 
     m <- findOracle oracle
     case m of
         Nothing           -> logInfo @String "oracle not found"
