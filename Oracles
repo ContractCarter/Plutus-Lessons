@@ -94,6 +94,7 @@ mkOracleValidator oracle x r ctx =
     
   --|Check if fees are paid
   -- Check Oracle Input + Output Values
+  -- Match input + output values
   -- Output Value greater or == (geq) to Input Value
    feesPaid :: Bool
    feesPaid =
