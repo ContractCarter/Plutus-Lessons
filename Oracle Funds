@@ -26,6 +26,11 @@ import           Prelude          (Show (..), (String, (<$>))
 import           Ledger           hiding (singleton)
 import           Ledger.Value     as Value
 
+--| Add up money in wallet return a value
+-- how many USD Tokens
+-- use public key to find all suitable UTxOs @ pubKeyAddress
+-- utxos are then map from UTxO references to UTxOs
+-- the map to change the elements to values  txOutValue . txOutTxOut.
 ownFunds :: Contract w s Text Value
 ownFunds = do
 pk    <- ownPubKey
