@@ -41,7 +41,8 @@ let v = mconcat $ Map.elems $ txOutValue . txOutTxOut <$> utxos
 logInfo @String $ "own funds: " ++ show (Value.flattenValue V)
 return v
 
--- variant returns =value and permanently tells 
+-- variant returns a value and permanently tells 
+-- monadic bind to the composite function (tell . Last . Just) tells the value
 ownFunds' :: Contract (Last Value) Empty Text ()
 ownFunds' = do
     handleError logError $ ownFunds >>= tell . Last . Just
