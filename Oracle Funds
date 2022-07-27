@@ -30,7 +30,9 @@ import           Ledger.Value     as Value
 -- how many USD Tokens
 -- use public key to find all suitable UTxOs @ pubKeyAddress
 -- utxos are then map from UTxO references to UTxOs
--- the map to change the elements to values  txOutValue . txOutTxOut.
+-- the map ignores keys + changes the elements to values  (txOutValue . txOutTxOut.()
+-- mconcat combines list of values in 1 value 
+-- return a Type value
 ownFunds :: Contract w s Text Value
 ownFunds = do
 pk    <- ownPubKey
@@ -39,6 +41,7 @@ let v = mconcat $ Map.elems $ txOutValue . txOutTxOut <$> utxos
 logInfo @String $ "own funds: " ++ show (Value.flattenValue V)
 return v
 
+-- variant returns =value and permanently tells 
 ownFunds' :: Contract (Last Value) Empty Text ()
 ownFunds' = do
     handleError logError $ ownFunds >>= tell . Last . Just
