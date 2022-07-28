@@ -31,7 +31,7 @@ mkStakingValidator addr () ctx = case scriptContextPurpose ctx of
     amount :: StakingCredential -> Integer
     amount cred = go $ txInfoWdr1 info 
       where 
-        go :: [(StakingCredential -> Integer
+        go :: [(StakingCredential)] -> Integer
         go [] = traceError "withdrawal not found"
         go ((cred', amt) : xs)
             |  cred' == cred = amt
