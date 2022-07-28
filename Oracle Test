@@ -1,5 +1,5 @@
 
- assetSymbol :: CurrencySymbol
+assetSymbol :: CurrencySymbol
 assetSymbol = "ff"
 
 assetToken :: TokenName
@@ -23,7 +23,7 @@ checkOracle oracle = do
         Just (_, _, x) -> Contract.logInfo $ "Oracle value: " ++ show x
     Contract.waitNSlots 1 >> checkOracle oracle
     
- myTrace :: EmulatorTrace ()
+myTrace :: EmulatorTrace ()
 myTrace = do
     let op = OracleParams
                 { opFees = 1_000_000
