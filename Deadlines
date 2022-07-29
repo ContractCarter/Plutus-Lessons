@@ -31,6 +31,7 @@ mkValidator dat () ctx = traceifFalse "beneficiary's signature missing"  signedB
     deadlineReached :: Bool 
     deadlineReached = contains (from $ deadline dat) $ txInfoValidRange info
     
+--| Boiler Plate code    
 data Vesting
 instance Scripts.ValidatorTypes Vesting where 
     type instance DatumType Vesting = VestingDatum
