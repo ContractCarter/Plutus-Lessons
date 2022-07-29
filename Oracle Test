@@ -68,6 +68,7 @@ myTrace = do
     callEndpoint @"retrieve" h3 ()
     callEndpoint @"retrieve" h4 ()
     void $ Emulator.waitNSlots 3
+  
   where
     getOracle :: ContractHandle (Last Oracle) OracleSchema Text -> EmulatorTrace Oracle
     getOracle h = do
