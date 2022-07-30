@@ -1,5 +1,6 @@
 
---| Wrap the type in generic form and give the type an object
+--| Boiler plate code of on-chain mechanisms
+-- Wrap the type in generic form and give the type an object
 newtype MyDatum = MyDatum Integer deriving newtype PlutusTx.IsData
 newtype Redeemer = MyRedemmer Integer deriving newtype PlutusTx.IsData
 
