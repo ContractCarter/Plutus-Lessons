@@ -6,7 +6,7 @@ newtype Redeemer = MyRedemmer Integer deriving newtype PlutusTx.IsData
 
 --| //code locks/unlocks transactions
 mkValidator :: MyDatum -> MyRedeemer -> ScriptContext -> Bool
-mkValidator _ _ _ = traceiffalse
+mkValidator dat r ctx = traceiffalse
 
 --| Script type defines Redeemer & Datum
 data Typed 
