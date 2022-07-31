@@ -4,6 +4,8 @@
 -- bindMaybe     :: Maybe a         -> (a -> Maybe b)          -> Maybe b
 -- bindEither    :: Either String a -> (a -> Either String b)  -> Either
 -- bindWriter    :: Writer a        -> (a -> IO b)             -> Writer
+
+--| constructors   
 --
 -- return              :: a -> IO a
 -- Just & Nothing      :: a -> Maybe a
