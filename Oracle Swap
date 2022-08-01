@@ -171,6 +171,7 @@ mkSwapValidator oracle addr pkh () ctx =
 
 
 --  Case redeemer "Use" from core module to be used for swap 
+-- swap Oracle and pay lovelace fee
     m <- findOracle oracle
     case m of
         Nothing           -> logInfo @String "oracle not found"
