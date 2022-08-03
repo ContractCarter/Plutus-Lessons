@@ -161,7 +161,8 @@ mkSwapValidator oracle addr pkh () ctx =
             awaitTxConfirmed $ txId ledgerTx
             logInfo @String $ "retrieved " ++ show (length xs) ++ " swap(s)"
             
- --| Case redeemer "Use" from core module to be used for swap           
+ --| Case redeemer "Use" from core module to be used for swap
+ -- ownFunds functions up all the money in our own wallet and returns a Value
             
           useSwap :: forall w s. HasBlockchainActions s => Oracle -> Contract w s Text ()
           useSwap oracle = do
@@ -171,7 +172,12 @@ mkSwapValidator oracle addr pkh () ctx =
 
 
 --  Case redeemer "Use" from core module to be used for swap 
+-- can't find oracle Nothing
+-- oracle found log message with current exchange rate
 -- swap Oracle and pay lovelace fee
+--- check pub keys + available swaps not linked to owner
+-- Haskel Prelude function (f) "find" takes a predicate and list
+--  Maybe returns one element of the list that satisfies the predicate.
     m <- findOracle oracle
     case m of
         Nothing           -> logInfo @String "oracle not found"
