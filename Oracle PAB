@@ -22,3 +22,25 @@ data OracleContracts = Init | Oracle CurrencySymbol | Swap Oracle.Oracle
 
 instance Pretty OracleContracts where
     pretty = viaShow
+
+
+
+-- boilerplate hooks up data type of OracleContracts
+-- reified contract Instances with (schema + 3 contracts)
+-- Init won't have any schema, just BlockChainActions
+-- Oracle uses OracleSchema & Swap uses SwapSchema
+handleOracleContracts ::
+    ( Member (Error PABError) effs
+    , Member (LogMsg (PABMultiAgentMsg (Builtin OracleContracts))) effs
+    )
+    => ContractEffect (Builtin OracleContracts)
+    ~> Eff effs
+handleOracleContracts = handleBuiltin getSchema getContract where
+    getSchema = \case
+        Init     -> endpointsToSchemas @Empty
+        Oracle _ -> endpointsToSchemas @(Oracle.OracleSchema .\\ BlockchainActions)
+        Swap _   -> endpointsToSchemas @(Oracle.SwapSchema   .\\ BlockchainActions)
+    getContract = \case
+        Init        -> SomeBuiltin   initContract
+        Oracle cs   -> SomeBuiltin $ Oracle.runOracle $ oracleParams cs
+        Swap oracle -> SomeBuiltin $ Oracle.swap oracle
