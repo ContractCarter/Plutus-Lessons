@@ -53,3 +53,8 @@ oracleParams cs = Oracle.OracleParams
     , Oracle.opSymbol = cs
     , Oracle.opToken  = usdt
     }
+
+handlers :: SimulatorEffectHandlers (Builtin OracleContracts)
+handlers =
+    Simulator.mkSimulatorHandlers @(Builtin OracleContracts) []
+    $ interpret handleOracleContracts
