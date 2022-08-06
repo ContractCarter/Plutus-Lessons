@@ -45,7 +45,8 @@ handleOracleContracts = handleBuiltin getSchema getContract where
         Oracle cs   -> SomeBuiltin $ Oracle.runOracle $ oracleParams cs
         Swap oracle -> SomeBuiltin $ Oracle.swap oracle
 
-
+--| Init will run initContract
+-- runOracle Contract with OracleParams (USD token + currency symbol)
 oracleParams :: CurrencySymbol -> Oracle.OracleParams
 oracleParams cs = Oracle.OracleParams
     { Oracle.opFees   = 1_000_000
