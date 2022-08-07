@@ -53,6 +53,8 @@ oracleParams cs = Oracle.OracleParams
     , Oracle.opSymbol = cs
     , Oracle.opToken  = usdt
     }
+--| Swap will run our swap contract with an oracle value.
+-- boilerplate code 
 
 handlers :: SimulatorEffectHandlers (Builtin OracleContracts)
 handlers =
