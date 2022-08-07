@@ -1,6 +1,6 @@
 --|Create a data type that corresponds to one of 3 contracts that'll run eventually
 -- Init constructor sets up an environment where USD (CurrencySymbol) Token is available + wallets
--- Oracle constructor = runOracle (start oracle + provide update enpoint)
+-- Oracle constructor = runOracle (start oracle + provide update endpoint)
 -- Swap parameter runs swap ctr + endpoints (offer, retrieve, use and funds)
 
 {-# LANGUAGE DeriveAnyClass     #-}
@@ -47,16 +47,37 @@ handleOracleContracts = handleBuiltin getSchema getContract where
 
 --| Init will run initContract
 -- runOracle Contract with OracleParams (USD token + currency symbol)
+-- Swap will run our swap contract with an oracle value
 oracleParams :: CurrencySymbol -> Oracle.OracleParams
 oracleParams cs = Oracle.OracleParams
     { Oracle.opFees   = 1_000_000
     , Oracle.opSymbol = cs
     , Oracle.opToken  = usdt
     }
---| Swap will run our swap contract with an oracle value.
--- boilerplate code 
-
+    
+--| boilerplate code 
 handlers :: SimulatorEffectHandlers (Builtin OracleContracts)
 handlers =
     Simulator.mkSimulatorHandlers @(Builtin OracleContracts) []
     $ interpret handleOracleContracts
+    
+--| initContract function mints USD Tokens and distributes them to the wallets
+--  tells the currency symbol for the USD Token.    
+initContract :: Contract (Last CurrencySymbol) BlockchainActions Text ()
+initContract = do
+    ownPK <- pubKeyHash <$> ownPubKey
+    cur   <-
+        mapError (pack . show)
+        (Currency.forgeContract ownPK [(usdt, fromIntegral (length wallets) * amount)]
+        :: Contract (Last CurrencySymbol) BlockchainActions Currency.CurrencyError Currency.OneShotCurrency)
+    let cs = Currency.currencySymbol cur
+        v  = Value.singleton cs usdt amount
+    forM_ wallets $ \w -> do
+        let pkh = pubKeyHash $ walletPubKey w
+        when (pkh /= ownPK) $ do
+            tx <- submitTx $ mustPayToPubKey pkh v
+            awaitTxConfirmed $ txId tx
+    tell $ Last $ Just cs
+  where
+    amount :: Integer
+    amount = 100_000_000    
