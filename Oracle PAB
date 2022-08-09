@@ -81,3 +81,6 @@ initContract = do
   where
     amount :: Integer
     amount = 100_000_000    
+    
+  wallets :: [Wallet]
+wallets = [Wallet i | i <- [1 .. 5]]  
