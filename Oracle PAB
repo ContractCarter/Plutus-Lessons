@@ -81,6 +81,7 @@ initContract = do
   where
     amount :: Integer
     amount = 100_000_000    
-    
+ --| wallets are hardcoded earlier in the code
+ -- wallets + tokens are arbitrary
   wallets :: [Wallet]
-wallets = [Wallet i | i <- [1 .. 5]]  
+  wallets = [Wallet i | i <- [1 .. 5]]  
