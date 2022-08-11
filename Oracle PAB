@@ -89,6 +89,9 @@ initContract = do
 --|main function, which is the entry point for the executable
 -- PAB uses a simulator Monad (similar to EmulatorTrace Monad)
 -- simulatorMonad can start contracts on wallets, inspect state logs, call endpoints, exct...
+-- logString starts PAB Server, startServerDebug returns a value to shutdown
+-- cidInit activates contracts wallet
+
 main :: IO ()
 main = void $ Simulator.runSimulationWith handlers $ do
     Simulator.logString @(Builtin OracleContracts) "Starting Oracle PAB webserver. Press enter to exit."
