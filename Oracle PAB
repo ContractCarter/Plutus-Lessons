@@ -91,7 +91,7 @@ initContract = do
 -- simulatorMonad can start contracts on wallets, inspect state logs, call endpoints, exct...
 -- logString starts PAB Server, startServerDebug returns a value to shutdown
 -- cidInit activates Init contract wallet start the instance, and then a value of the reified contract type (1)
--- Currency Symbol (cs)
+-- Currency Symbol (cs) helper function (waitForLast)
 
 main :: IO ()
 main = void $ Simulator.runSimulationWith handlers $ do
@@ -113,3 +113,10 @@ main = void $ Simulator.runSimulationWith handlers $ do
 
     void $ liftIO getLine
     shutdown
+    
+    --| define waitForLast helper function
+    waitForLast ::  FromJSON a => ContractInstanceId -> Simulator.Simulation t a
+    waitForLast cid =
+        flip Simulator.waitForState cid $ \json -> case fromJSON json of 
+            Success (Last (Just x)) -> Just x
+            _                       -> Nothing
