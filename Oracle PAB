@@ -90,7 +90,8 @@ initContract = do
 -- PAB uses a simulator Monad (similar to EmulatorTrace Monad)
 -- simulatorMonad can start contracts on wallets, inspect state logs, call endpoints, exct...
 -- logString starts PAB Server, startServerDebug returns a value to shutdown
--- cidInit activates contracts wallet
+-- cidInit activates contracts wallet start the instance, and then a value of the reified contract type (1)
+-- Currency Symbol (cs)
 
 main :: IO ()
 main = void $ Simulator.runSimulationWith handlers $ do
