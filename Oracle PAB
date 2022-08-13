@@ -115,6 +115,9 @@ main = void $ Simulator.runSimulationWith handlers $ do
     shutdown
     
     --| define waitForLast helper function
+    -- read state of the contract by using (tell)
+    -- applies JSON value to the provided predicate
+    -- if result is Nothing, it waits until the state changes again. if it is Just x, it will return the x.
     waitForLast ::  FromJSON a => ContractInstanceId -> Simulator.Simulation t a
     waitForLast cid =
         flip Simulator.waitForState cid $ \json -> case fromJSON json of 
