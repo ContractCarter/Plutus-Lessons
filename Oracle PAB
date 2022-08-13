@@ -91,7 +91,7 @@ initContract = do
 -- simulatorMonad can start contracts on wallets, inspect state logs, call endpoints, exct...
 -- logString starts PAB Server, startServerDebug returns a value to shutdown
 -- cidInit activates Init contract wallet start the instance, and then a value of the reified contract type (1)
--- Currency Symbol (cs) helper function (waitForLast)
+-- Currency Symbol (cs) helper function (waitForLast) (12?)
 -- wait until Init contract is finished (103)
 main :: IO ()
 main = void $ Simulator.runSimulationWith handlers $ do
@@ -102,6 +102,8 @@ main = void $ Simulator.runSimulationWith handlers $ do
     cs      <- waitForLast cidInit
     _       <- Simulator.waitUntilFinished cidInit
 
+
+--| cidOracle activates Oracle Contract + USD value (cs)
     cidOracle <- Simulator.activateContract (Wallet 1) $ Oracle cs
     liftIO $ writeFile "oracle.cid" $ show $ unContractInstanceId cidOracle
     oracle <- waitForLast cidOracle
