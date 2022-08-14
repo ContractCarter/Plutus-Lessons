@@ -126,3 +126,8 @@ main = void $ Simulator.runSimulationWith handlers $ do
         flip Simulator.waitForState cid $ \json -> case fromJSON json of 
             Success (Last (Just x)) -> Just x
             _                       -> Nothing
+            
+    --| Wallets are hardcoded earlier in the code
+    -- # of wallets + tokens are arbitrary 
+    wallets :: [Wallet]
+    wallets = [Wallet i | i <- [1 .. 5]]
