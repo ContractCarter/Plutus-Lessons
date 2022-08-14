@@ -1,7 +1,7 @@
 --|Create a data type that corresponds to one of 3 contracts that'll run eventually
 -- Init constructor sets up an environment where USD (CurrencySymbol) Token is available + wallets
 -- Oracle constructor = runOracle (start oracle + provide update endpoint)
--- Swap parameter runs swap ctr + endpoints (offer, retrieve, use and funds)
+-- Swap parameter runs swap contract + endpoints (offer, retrieve, use and funds)
 
 {-# LANGUAGE DeriveAnyClass     #-}
 {-# LANGUAGE DeriveGeneric      #-}
@@ -35,6 +35,9 @@ handleOracleContracts ::
     )
     => ContractEffect (Builtin OracleContracts)
     ~> Eff effs
+--| Init will run initContract
+-- runOracle Contract with OracleParams (USD token + currency symbol)
+-- Swap will run our swap contract with an oracle value
 handleOracleContracts = handleBuiltin getSchema getContract where
     getSchema = \case
         Init     -> endpointsToSchemas @Empty
