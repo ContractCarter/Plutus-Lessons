@@ -36,7 +36,7 @@ handleOracleContracts ::
     => ContractEffect (Builtin OracleContracts)
     ~> Eff effs
 --| Init will run initContract
--- runOracle Contract with OracleParams (USD token + currency symbol)
+-- runOracle Contract with OracleParams (USD token = currency symbol)
 -- Swap will run our swap contract with an oracle value
 handleOracleContracts = handleBuiltin getSchema getContract where
     getSchema = \case
@@ -48,9 +48,7 @@ handleOracleContracts = handleBuiltin getSchema getContract where
         Oracle cs   -> SomeBuiltin $ Oracle.runOracle $ oracleParams cs
         Swap oracle -> SomeBuiltin $ Oracle.swap oracle
 
---| Init will run initContract
--- runOracle Contract with OracleParams (USD token + currency symbol)
--- Swap will run our swap contract with an oracle value
+--| oracleParams which defines the currency symbol (USDT) + Fees
 oracleParams :: CurrencySymbol -> Oracle.OracleParams
 oracleParams cs = Oracle.OracleParams
     { Oracle.opFees   = 1_000_000
