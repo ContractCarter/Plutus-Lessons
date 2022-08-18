@@ -82,6 +82,7 @@ initContract = do
   where
     amount :: Integer
     amount = 100_000_000    
+    
  --| wallets are hardcoded earlier in the code
  -- wallets + tokens are arbitrary
   wallets :: [Wallet]
@@ -92,8 +93,8 @@ initContract = do
 -- simulatorMonad can start contracts on wallets, inspect state logs, call endpoints, exct...
 -- logString starts PAB Server, startServerDebug returns a value to shutdown
 -- cidInit activates Init contract wallet start the instance, and then a value of the reified contract type (1)
--- Currency Symbol (cs) helper function (waitForLast) (12?)
--- wait until Init contract is finished (103)
+-- Currency Symbol (cs) helper function (waitForLast) (124)
+-- wait until Init contract is finished (104)
 main :: IO ()
 main = void $ Simulator.runSimulationWith handlers $ do
     Simulator.logString @(Builtin OracleContracts) "Starting Oracle PAB webserver. Press enter to exit."
@@ -108,7 +109,9 @@ main = void $ Simulator.runSimulationWith handlers $ do
     cidOracle <- Simulator.activateContract (Wallet 1) $ Oracle cs
     liftIO $ writeFile "oracle.cid" $ show $ unContractInstanceId cidOracle
     oracle <- waitForLast cidOracle
-
+    
+--| loop over all wallets except (Wallet 1) running oracle, activate swap contract 
+--  block until the user presses enter, and then we shutdown the server.
     forM_ wallets $ \w ->
         when (w /= Wallet 1) $ do
             cid <- Simulator.activateContract w $ Swap oracle
