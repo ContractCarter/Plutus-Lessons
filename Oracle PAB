@@ -138,6 +138,11 @@ main = void $ Simulator.runSimulationWith handlers $ do
     usdt :: TokenName
 
 --| Oracle Clients
+-- read oracle.cid file get oracle instance id
+-- recursive function go
+-- go looks up current exchange rate
+-- if changed call updateOracle endpoint 
+-- waits a couple seconds (threadDelay) then continues
 
 main :: IO ()
 main = do
