@@ -137,7 +137,7 @@ main = void $ Simulator.runSimulationWith handlers $ do
     
     usdt :: TokenName
 
---| Oracle Clients
+--| Oracle Clients front end
 -- read oracle.cid file get oracle instance id
 -- recursive function go
 -- go looks up current exchange rate
