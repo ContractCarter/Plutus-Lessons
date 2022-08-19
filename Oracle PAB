@@ -138,3 +138,18 @@ main = void $ Simulator.runSimulationWith handlers $ do
     usdt :: TokenName
 
 --| Oracle Clients
+
+main :: IO ()
+main = do
+    uuid <- read <$> readFile "oracle.cid"
+    putStrLn $ "oracle contract instance id: " ++ show uuid
+    go uuid Nothing
+  where
+    go :: UUID -> Maybe Integer -> IO a
+    go uuid m = do
+        x <- getExchangeRate
+        let y = Just x
+        when (m /= y) $
+            updateOracle uuid x
+        threadDelay 5_000_000
+        go uuid y
