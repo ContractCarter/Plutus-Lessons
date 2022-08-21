@@ -162,3 +162,27 @@ main = do
 --| Swap Client
 -- create a console interface
 -- call endpoints
+
+main :: IO ()
+main = do
+    [i :: Int] <- map read <$> getArgs
+    uuid       <- read <$> readFile ('W' : show i ++ ".cid")
+    hSetBuffering stdout NoBuffering
+    putStrLn $ "swap contract instance id for Wallet " ++ show i ++ ": " ++ show uuid
+    go uuid
+  where
+    go :: UUID -> IO a
+    go uuid = do
+        cmd <- readCommand
+        case cmd of
+            Offer amt -> offer uuid amt
+            Retrieve  -> retrieve uuid
+            Use       -> use uuid
+            Funds     -> getFunds uuid
+        go uuid
+
+    readCommand :: IO Command
+    readCommand = do
+        putStr "enter command (Offer amt, Retrieve, Use or Funds): "
+        s <- getLine
+        maybe readCommand return $ readMaybe s
