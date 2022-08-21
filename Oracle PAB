@@ -158,3 +158,7 @@ main = do
             updateOracle uuid x
         threadDelay 5_000_000
         go uuid y
+
+--| Swap Client
+-- create a console interface
+-- call endpoints
