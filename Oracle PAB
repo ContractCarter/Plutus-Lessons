@@ -161,7 +161,6 @@ main = do
 
 --| Swap Client
 -- create a console interface
--- call endpoints
 
 main :: IO ()
 main = do
@@ -173,6 +172,9 @@ main = do
   where
     go :: UUID -> IO a
     go uuid = do
+    
+   --| Take the command from console
+   -- add endpoints 
         cmd <- readCommand
         case cmd of
             Offer amt -> offer uuid amt
@@ -180,7 +182,6 @@ main = do
             Use       -> use uuid
             Funds     -> getFunds uuid
         go uuid
-
     readCommand :: IO Command
     readCommand = do
         putStr "enter command (Offer amt, Retrieve, Use or Funds): "
