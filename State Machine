@@ -3,6 +3,7 @@
 -- # of lovelace to stake 
 -- Two slots (gPlayDeadline = make a move) + (gRevealDeadline = show how u won)
 -- gToken = Arbitrary NFT to identify UTXO 
+
 data Game = Game
     { gFirst          :: !PubKeyHash
     , gSecond         :: !PubKeyHash
@@ -11,3 +12,14 @@ data Game = Game
     , gRevealDeadline :: !Slot
     , gToken          :: !AssetClass
     } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
+
+--| Next, we define the two moves that the players can make.
+
+data GameChoice = Zero | One
+    deriving (Show, Generic, FromJSON, ToJSON, ToSchema, Prelude.Eq, Prelude.Ord)
+
+instance Eq GameChoice where
+    {-# INLINABLE (==) #-}
+    Zero == Zero = True
+    One  == One  = True
+    _    == _    = False
