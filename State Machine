@@ -1,0 +1,8 @@
+data Game = Game
+    { gFirst          :: !PubKeyHash
+    , gSecond         :: !PubKeyHash
+    , gStake          :: !Integer
+    , gPlayDeadline   :: !Slot
+    , gRevealDeadline :: !Slot
+    , gToken          :: !AssetClass
+    } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
