@@ -2,7 +2,7 @@
 -- players define by public key
 -- # of lovelace to stake 
 -- Two slots (gPlayDeadline = make a move) + (gRevealDeadline = show how u won)
--- gToken - NFT 
+-- gToken = Arbitrary NFT to identify UTXO 
 data Game = Game
     { gFirst          :: !PubKeyHash
     , gSecond         :: !PubKeyHash
