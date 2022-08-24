@@ -38,8 +38,20 @@ instance Eq GameChoice where
 --| Redeemer data type
 -- Play second player makes a move
 -- Reveals shows 1st players encrypted choice
--- Claim shows if 1st or 2nd won
+-- Claim shows if 1st or 2nd won based on the play and reveal deadline
+
  data GameRedeemer = Play GameChoice | Reveal ByteString | ClaimFirst | ClaimSecond
     deriving Show
     
-    
+--| helper function of lovelace values    
+ 
+ lovelaces :: Value -> Integer 
+ lovelaces = Ada.getLovelace . Ada.fromValue
+ 
+--| helper function of gameDatum
+
+gameDatum :: TxOut -> (DatumHash -> Maybe Datum) -> Maybe GameDatum
+gameDatum o f = do
+    dh        <- txOutDatum o
+    Datum d   <- f dh
+    PlutusTx.fromData d
