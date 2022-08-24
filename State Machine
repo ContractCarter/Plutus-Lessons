@@ -13,7 +13,7 @@ data Game = Game
     , gToken          :: !AssetClass
     } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
 
---| Next, we define the two moves that the players can make.
+--| Next, we define the two moves that the players can make (Zero & One)
 
 data GameChoice = Zero | One
     deriving (Show, Generic, FromJSON, ToJSON, ToSchema, Prelude.Eq, Prelude.Ord)
@@ -23,3 +23,10 @@ instance Eq GameChoice where
     Zero == Zero = True
     One  == One  = True
     _    == _    = False
+
+ data GameDatum = GameDatum Bytestring (Maybe GameChoice)
+ deriving Show
+ 
+ instance Eq GameDatum where
+ {-# INLINABLE (==) #-}
+ GameDatum bs mc == GameDatum bs' mc' = (bs == bs') && (mc == mc')
