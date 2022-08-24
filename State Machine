@@ -49,6 +49,10 @@ instance Eq GameChoice where
  lovelaces = Ada.getLovelace . Ada.fromValue
  
 --| helper function of gameDatum
+--| Maybe Monad bind caputures effects of getting Datum Hash
+-- Output has a Datum, succeeds get Datum Hash (dh)
+-- Datum Hash turns into Datum, succeeds get d
+-- Datum (d) Maybe turns into GameDatum
 
 gameDatum :: TxOut -> (DatumHash -> Maybe Datum) -> Maybe GameDatum
 gameDatum o f = do
