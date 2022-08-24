@@ -14,7 +14,8 @@ data Game = Game
     } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
 
 --| Next, we define the two moves that the players can make (Zero & One)
-
+-- need Plutus Eq for the instance,
+-- Inlinable pragma on Plutus Eq for the GameChoice
 data GameChoice = Zero | One
     deriving (Show, Generic, FromJSON, ToJSON, ToSchema, Prelude.Eq, Prelude.Ord)
 
@@ -24,6 +25,9 @@ instance Eq GameChoice where
     One  == One  = True
     _    == _    = False
 
+--| For state, we will use a type called GameDatum.
+--  ByteString is the hash that the first player submits
+-- Maybe GameChoice is either Just the move of the second player, or Nothing
  data GameDatum = GameDatum Bytestring (Maybe GameChoice)
  deriving Show
  
