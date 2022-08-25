@@ -59,3 +59,8 @@ gameDatum o f = do
     dh        <- txOutDatum o
     Datum d   <- f dh
     PlutusTx.fromData d
+    
+    
+--| Core business logic mkGameValidator 
+mkGameValidator :: Game -> ByteString -> ByteString -> GameDatum -> GameRedeemer -> ScriptContext -> Bool
+mkGameValidator game bsZero' bsOne' dat red ctx
