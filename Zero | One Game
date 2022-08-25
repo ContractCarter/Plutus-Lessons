@@ -63,4 +63,15 @@ gameDatum o f = do
     
 --| Core business logic mkGameValidator 
 mkGameValidator :: Game -> ByteString -> ByteString -> GameDatum -> GameRedeemer -> ScriptContext -> Bool
-mkGameValidator game bsZero' bsOne' dat red ctx
+mkGameValidator game bsZero' bsOne' dat red ctx =
+
+
+    traceIfFalse "token missing from input" (assetClassValueOf (txOutValue ownInput) (gToken game) == 1) &&
+    case (dat, red) of
+        (GameDatum bs Nothing, Play c) -> 
+             traceIfFalse "not signed by second player"  (txSigneBy info (gSecond game))                                     &&
+             traceIfFalse "first player's stake missing" (lovelaces (txOutValue ownInput) == gStake game)                    &&
+             traceIfFalse "second player's stake missing (lovelaces (txOutValue ownOutput) == (2 * gstake game))             &&
+             traceIfFalse "wrong output datum"           (outputDatum == GameDatum bs (Just c))                              &&
+             traceIfFalse "missed deadline"              (to (gPlayDeadline game) 'contains' txInfoValidRange info)          &&
+             traceIfFalse "token missing from output"    (assetClassValueOf (txOutValue ownOutput) (gToken game) == 1)       
