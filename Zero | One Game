@@ -65,6 +65,13 @@ gameDatum o f = do
 mkGameValidator :: Game -> ByteString -> ByteString -> GameDatum -> GameRedeemer -> ScriptContext -> Bool
 mkGameValidator game bsZero' bsOne' dat red ctx =
 
+--| first situation second player has not yet moved, and they are just now making their move
+-- check 2nd player sign transaction
+-- check 1st player stake is in input
+-- check 2nd player stake added to total stake in output
+-- check output datum hash + 2nd player choice
+-- check PlayDeadline
+-- check NFT inside the output
 
     traceIfFalse "token missing from input" (assetClassValueOf (txOutValue ownInput) (gToken game) == 1) &&
     case (dat, red) of
