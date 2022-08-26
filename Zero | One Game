@@ -83,7 +83,7 @@ mkGameValidator game bsZero' bsOne' dat red ctx =
              traceIfFalse "missed deadline"              (to (gPlayDeadline game) 'contains' txInfoValidRange info)          &&
              traceIfFalse "token missing from output"    (assetClassValueOf (txOutValue ownOutput) (gToken game) == 1)       
 
---| Second situation both players moved, 2nd player discovers they won 
+--| Second situation  1st players discover he won, and has to reveal it
 -- to prove the winnings must check reveal nonce 
 -- check signed by first player
 -- check nonce matches with hash submitted earlier
@@ -98,12 +98,22 @@ mkGameValidator game bsZero' bsOne' dat red ctx =
     traceIfFalse "wrong stake"                  (lovelaces (txOutValue ownInput) == (2 * gStake game))                       &&
     traceIfFalse "NFT must go to first player"  nftToFirst
     
+--| 2nd player doesn't move past deadline, so 1st player claims his stake
+-- check  1st player sig
+-- check 2nd player stake
+-- check 1st player gets NFT back
+
 (GameDatum _ Nothing, ClaimFirst) ->
-    tracrIfFalse "not signed by second player"  (txSignedBy info (gFirst game))
+    tracrIfFalse "not signed by first player"  (txSignedBy info (gFirst game))
     traceIfFalse "too early"                    (from (1 + gPlayDeadline game) 'contains'n txInfoVaidRange info)
     traceIfFalse "wrong stake"                  (lovelaces (txOutValue ownInput) == gStake game)
     traceIfFalse "NFT must go to first player"  nftToFirst
     
+--| Both players moved, 1st player doesn't reveal nonce pass deadline
+--  2nd player claims stake 
+--  check second player sig
+--  check stake #
+-- check  1st player gets NFT back
 (GameDatum _ (Just _), ClaimSecond) ->
     traceIfFalse "not signed by second player"  (txSignedBy info (gSecond game))                                            &&
     traceIfFalse "to early"                     (from (1 + gRevealDeadline game) 'contains' txInfoValidRange info)          &&
