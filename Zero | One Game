@@ -107,5 +107,5 @@ mkGameValidator game bsZero' bsOne' dat red ctx =
 (GameDatum _ (Just _), ClaimSecond) ->
     traceIfFalse "not signed by second player"  (txSignedBy info (gSecond game))                                            &&
     traceIfFalse "to early"                     (from (1 + gRevealDeadline game) 'contains' txInfoValidRange info)          &&
-    traceIfFalse "wrong stake"                  (
+    traceIfFalse "wrong stake"                  (lovelaces (txOutValue ownInput) == ( 2* gStake game)                       &&
     traceIfFalse "NFT must go to first player"  nftToFirst 
