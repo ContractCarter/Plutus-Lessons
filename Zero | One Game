@@ -113,9 +113,23 @@ mkGameValidator game bsZero' bsOne' dat red ctx =
 --  2nd player claims stake 
 --  check second player sig
 --  check stake #
--- check  1st player gets NFT back
+--  check  1st player gets NFT back
 (GameDatum _ (Just _), ClaimSecond) ->
     traceIfFalse "not signed by second player"  (txSignedBy info (gSecond game))                                            &&
     traceIfFalse "to early"                     (from (1 + gRevealDeadline game) 'contains' txInfoValidRange info)          &&
     traceIfFalse "wrong stake"                  (lovelaces (txOutValue ownInput) == ( 2* gStake game)                       &&
     traceIfFalse "NFT must go to first player"  nftToFirst 
+    
+--| Boilerplate code
+info :: TxInfo
+info = scriptContextTxInfo ctx
+
+ownInput :: TxOut
+ownInput = case findOwnInput ctx of
+    Nothing -> traceError "game input missing"
+    Just i  -> txInInfoResolved i
+
+ownOutput :: TxOut
+ownOutput = case getContinuingOutputs ctx of
+    [o] -> o
+    _   -> traceError "expected exactly one game output"
