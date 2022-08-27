@@ -133,3 +133,9 @@ ownOutput :: TxOut
 ownOutput = case getContinuingOutputs ctx of
     [o] -> o
     _   -> traceError "expected exactly one game output"
+    
+    
+outputDatum :: GameDatum
+outputDatum = case gameDatum ownOutput (`findDatum` info) of
+    Nothing -> traceError "game output datum not found"
+    Just d  -> d
