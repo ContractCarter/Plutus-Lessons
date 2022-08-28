@@ -140,10 +140,15 @@ outputDatum = case gameDatum ownOutput (`findDatum` info) of
     Nothing -> traceError "game output datum not found"
     Just d  -> d
     
+--| check the hash of the nonce linked to GameChoice
+-- helper function convert GameChoice to ByteSting Zero' & One'
 checkNonce :: ByteString -> ByteString -> GameChoice -> Bool
-checkNonce bs nonce cSecond = sha2_256 (nonce `concatenate` cFirst) == bs
+checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
   where
     cFirst :: ByteString
     cFirst = case cSecond of
         Zero -> bsZero'
-        One  -> bsOne'   
+        One  -> bsOne'
+ --| helper function NFT goes back to 1st player after        
+ nftToFirst :: Bool
+ nftToFirst = assetClassValueOf (valuePaidTo info $ gFirst game) (gToken game) == 1
