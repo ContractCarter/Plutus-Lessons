@@ -149,6 +149,38 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
     cFirst = case cSecond of
         Zero -> bsZero'
         One  -> bsOne'
+        
  --| helper function NFT goes back to 1st player after        
  nftToFirst :: Bool
  nftToFirst = assetClassValueOf (valuePaidTo info $ gFirst game) (gToken game) == 1
+ 
+ data Gaming 
+ instance Scripts.ScriptType Gaming where
+     type instance DatumType Gaming = GameDatum
+     type instance RedeemerType Gaming = GameRedeemer
+    
+  bsZero, bsOne :: ByteString 
+  bsZero = "0"
+  bsOne =  "1"
+  
+  gameInst :: Game -> Scripts.ScriptInstance Gaming
+  gameInst game = Scripts.validator @Gaming
+      ($$(PlutusTx.compile [|| mkGameValidator ||])
+          'PlutusTx.applyCode' PlutusTx.liftCode game
+          'PlutusTx.applyCode' PlutusTx.liftCode bsZero
+          'PlutusTx.applyCode' PlutusTx.liftCode bsOne)
+        $$(PlutusTx.compile [|| wrap ||])
+      where
+        wrap = Scripts.wrapValidator @GameDatum @VGameRedeemer
+ --| Boilerplate code        
+   gameValidator :: Game -> Validator 
+   gameValidator = Scripts.validatorScript . gameInst
+   
+   gameAddress :: Game -> Ledger.Address
+   gameAddress = scriptAddress . gameValidator
+   
+   findGameOutput :: HasBlockchainActions s => Game -> Contract w s Text (Maybe (TxOutRef, TxOutTx GameDatum))
+   findGameOutput game = do 
+       utxos <- utxoAt $ gameAddress game 
+       return $ do 
+       (oref, o) <- find f $ Map.toList utxos
