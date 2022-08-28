@@ -163,6 +163,7 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
   bsZero = "0"
   bsOne =  "1"
   
+  --| compile code
   gameInst :: Game -> Scripts.ScriptInstance Gaming
   gameInst game = Scripts.validator @Gaming
       ($$(PlutusTx.compile [|| mkGameValidator ||])
@@ -172,15 +173,21 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
         $$(PlutusTx.compile [|| wrap ||])
       where
         wrap = Scripts.wrapValidator @GameDatum @VGameRedeemer
+        
  --| Boilerplate code        
    gameValidator :: Game -> Validator 
    gameValidator = Scripts.validatorScript . gameInst
    
    gameAddress :: Game -> Ledger.Address
    gameAddress = scriptAddress . gameValidator
-   
+  
+  --| find correct UTxO with NFT
    findGameOutput :: HasBlockchainActions s => Game -> Contract w s Text (Maybe (TxOutRef, TxOutTx GameDatum))
    findGameOutput game = do 
        utxos <- utxoAt $ gameAddress game 
        return $ do 
        (oref, o) <- find f $ Map.toList utxos
+  where
+    f :: (TxOutRef, TxOutTx) -> Bool
+    f (_, o) = assetClassValueOf (txOutValue $ txOutTxOut o) (gToken game) == 1
+    
