@@ -192,7 +192,10 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
     f (_, o) = assetClassValueOf (txOutValue $ txOutTxOut o) (gToken game) == 1
     
     --| Off-chain
-    
+    --| Off-chain
+    -- Two contracts + 2 param types for 1st & 2nd player
+    --  firstGame contract = FirstParams
+    -- Don't need fpFirst cause 1st player owns the wallet
   data FirstParams = FirstParams
        { fpSecond           :: !PubKeyHash
        , fpStake            :: !Integer
@@ -204,6 +207,12 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
        , fpChoice           :: !GameChoice
        } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
        
+--| Start of First player contract 
+-- get firsr player pubKeyHash
+-- use game data type populate fields of game
+-- Value v is 1st player stake + NFT
+-- first player choice is encrypted
+-- submit tx
    firstGame :: forall w s. HasBlockchainActions s => FirstParams -> Contract w s Text ()
    firstGame fp = do
        pkh <- pubKeyHash <$> Contract.ownPubKey 
