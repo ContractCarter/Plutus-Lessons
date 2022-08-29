@@ -39,8 +39,8 @@ instance Eq GameChoice where
 -- Play second player makes a move
 -- Reveals shows 1st players encrypted choice
 -- Claim shows if 1st or 2nd won based on the play and reveal deadline
-
  data GameRedeemer = Play GameChoice | Reveal ByteString | ClaimFirst | ClaimSecond
+
     deriving Show
     
 --| helper function of lovelace values    
@@ -191,3 +191,39 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
     f :: (TxOutRef, TxOutTx) -> Bool
     f (_, o) = assetClassValueOf (txOutValue $ txOutTxOut o) (gToken game) == 1
     
+    --| Off-chain
+    
+  data FirstParams = FirstParams
+       { fpSecond           :: !PubKeyHash
+       , fpStake            :: !Integer
+       , fpPlayDeadline     :: !Slot
+       , fpRevealDeadline   :: !Slot 
+       , fpNonce            :: !ByteString
+       , fpCurrency         :: !CurrencySymbol
+       , fpTokenName        :: !TokenName
+       , fpChoice           :: !GameChoice
+       } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
+       
+   firstGame :: forall w s. HasBlockchainActions s => FirstParams -> Contract w s Text ()
+   firstGame fp = do
+       pkh <- pubKeyHash <$> Contract.ownPubKey 
+       let game = Game 
+               { gFirst           = pkh
+               , gSecond          = fpSecond fp
+               , gStake           = fpStake  fp
+               , gPlayDeadline    = fpPlayDeadline fp 
+               , gRevealDeadline  = fpRevealDeadline fp
+               , gToken           = AssetClass (fpCurrency fp, fpTokenName fp)
+               }
+            v    = lovelaceValueOf (fpStake fp) <> assetClassValue (gToken game) 1
+            c    = fpChoice fp
+            bs   = sha2_256 $ fpNonce fp 'concatenate' if c == Zero then bsZero else bsOne 
+            tx   = Constraints.mustPayToTheScript (GameDatum bs Nothing) v
+       ledgerTx <- submitTxConstraints (gameInst game) tx
+       void $ awaitTxConfirmed $ txId ledgerTx
+       logInfo @String $ "made first move: " ++ show (fpChoice fp)
+       
+       void $ awaitSlot $ 1 * fpPlayDeadline fp
+       
+       m <- findGameOutput game 
+       case m of 
