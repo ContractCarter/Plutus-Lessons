@@ -259,4 +259,15 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
                     void $ awaitTxConfirmed $ txId ledgerTx'
                     logInfo @String "victory"
                     
-                _ -> logInfo @String "second player played and won"    
+                _ -> logInfo @String "second player played and won" 
+                
+           data SecondParams = SecondParams
+               { spFirst          :: !PubKeyHash
+               , spStake          :: !Integer
+               , spPlayDeadline   :: !Slot
+               , spRevealDeadline :: !Slot
+               , spTokenName      :: !TokenName
+               , spChoice         :: !GameChoice
+               } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
+               
+               
