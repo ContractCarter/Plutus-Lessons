@@ -232,7 +232,31 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
        void $ awaitTxConfirmed $ txId ledgerTx
        logInfo @String $ "made first move: " ++ show (fpChoice fp)
        
+      --| Wait till fpPlayDealine has past for Second player too make a move
        void $ awaitSlot $ 1 * fpPlayDeadline fp
        
-       m <- findGameOutput game 
-       case m of 
+      --| find UTxO with NFT 
+        m <- findGameOutput game 
+        case m of 
+           Nothing              -> throwError "game output not found"
+            Just (oref, o, dat) -> case dat of
+                GameDatum _ Nothing -> do
+                    logInfo @String "second player did not play"
+                    let lookups = Constraints.unspentOutputs (Map.singleton oref o) <>
+                                  Constraints.otherScript (gameValidator game)
+                        tx"     = Constraints.mustSpendScriptOutput oref (Redeemer $ PlutusTx.toData ClaimFirst)
+                     ledgerTx" <- submitTxConstraintsWith @Gaming lookups tx'
+                     void $ awaitTxConfirmed $ txId ledgerTx'
+                     logInfo @String "reclaimed stake"
+                                  
+                GameDatum _ (Just c') | c" == c -> do
+                    logInfo @String "second player played and lost"
+                    let lookups = Constraints.unspentOutputs (Map.singleton oref o)                                         <>
+                                  Constraints.otherScript (gameValidator game)
+                         tx"    = Constraints.mustSpendScriptOutput oref (Redeemer $ PlutusTx.toData $ Reveal $ fpNonce fp) <>
+                                  Constraints.mustValidateIn (to $ fpRevealDeadline fp)
+                    ledgerTx' <- submitTxConstraintsWith @Gaming lookups tx'
+                    void $ awaitTxConfirmed $ txId ledgerTx'
+                    logInfo @String "victory"
+                    
+                _ -> logInfo @String "second player played and won"    
