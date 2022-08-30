@@ -270,4 +270,14 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
                , spChoice         :: !GameChoice
                } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
                
-               
+          secondGame :: forall w s. HasBlockchainActions s => SecondParams -> Contract w s Text ()
+          secondGame sp = do
+              pkh <- pubKeyHash <$> Contract.ownPubKey
+              let game = Game 
+                      { gFirst          = spFirst sp
+                      , gSecond         = pkh 
+                      , gStake          = spStake sp
+                      , gPlayDeadline   = spPlayDeadline sp
+                      , gRevealDeadline = spRevealDeadline sp
+                      , gToken          = AssetClass (spCurrency sp, spTokenName sp)
+                      }
