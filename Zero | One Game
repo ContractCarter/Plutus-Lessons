@@ -300,3 +300,23 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
                           logInfo @String $ "made second move: " ++ show (spChoice sp)
                           
                           void $ awaitSlot $ 1 + spRevealDeadline sp
+                          
+                          m' <- findGameOutput game 
+                          case m' of
+                              Nothing               -> logInfo @String "first player won"
+                               Just (oref', o' , _) -> do
+                                    logInfo @String "first player didn't reveal"
+                                    let lookups' = Constraints.unspentOutputs (Map.singleton oref' o')                             <>
+                                                   Constraints.otherScript (gameValidator game)
+                                         tx'     = Constraints.mustSpendScriptOutput oref' (Redeemer $PlutusTx.toData ClaimSecond) <>
+                                                   Constraints.mustValidateIn (from $ 1 + spRevealDeadline sp)                     <>
+                                                   Constraints.mustPayToPubKey (spFirst sp) token
+                                     ledgerTx' <- submitTxConstraintsWith @Gaming lookups' tx'
+                                     void $ awaitTxConfirmed $ txId ledgerTx'
+                                     logInfo @String "second player won"
+                                     
+                                _ -> logInfo @String "no running game found"
+                                
+                           type GameSchema = BlockchainActions ./\ Endpoint "first" FirstParams .\/ Endpoint "second" SecondParams
+                           
+                           endpoints :: Contract () GameSchema Text ()
