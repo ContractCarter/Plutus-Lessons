@@ -281,3 +281,22 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
                       , gRevealDeadline = spRevealDeadline sp
                       , gToken          = AssetClass (spCurrency sp, spTokenName sp)
                       }
+               m <- findGameOutput game 
+               case m of
+                   Just (oref, o, GameDatum bs Nothing) -> do
+                       logInfo @String "running game found"
+                       let token   = assetClassValue (gToken game) 1
+                       let v       = let x = lovelaceValueOf (spStake sp) in x <> x <> token
+                           c       = spChoice sp 
+                           lookups = Constraints.unspentOutputs (Map.singleton oref o)
+                                     Constraints.otherScript (gameValidator game)
+                                     Constraints.scriptInstanceLookups (gameInst game)
+                           tx      = Constraints.mustSpendScriptOutput oref (Redeemer $ PlutusTx.toData $ Play c)
+                                     Constraints.mustPayToTheScript (GameDatum bs $ Just c) v
+                                     Constraints.mustValidateIn (to $ spPlayDeadline sp)
+                         ledgerTx <- submitTxConstraintsWith @Gaming lookups tx
+                          let tid = txId ledgerTx
+                          void $ awaitTxConfirmed tid 
+                          logInfo @String $ "made second move: " ++ show (spChoice sp)
+                          
+                          void $ awaitSlot $ 1 + spRevealDeadline sp
