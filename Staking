@@ -9,7 +9,9 @@ import           Plutus.V1.Ledger.Credential     (StakingCredential)
 import qualified PlutusTX
 import           PlutusTx.Prelude
 
+-- Staking Template 
 --|certify Address and reward owner
+--  No Datum/Redeemer
 -- Address must be paid half the total amount 
 {-# INLINABLE mkStakingValidator #-}
 mkStakingValidator :: Address -> () -> ScriptContext -> Bool
