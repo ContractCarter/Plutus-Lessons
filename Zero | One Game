@@ -269,7 +269,7 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
                , spTokenName      :: !TokenName
                , spChoice         :: !GameChoice
                } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
-               
+          --| Using Second player wallet, need 1st player address     
           secondGame :: forall w s. HasBlockchainActions s => SecondParams -> Contract w s Text ()
           secondGame sp = do
               pkh <- pubKeyHash <$> Contract.ownPubKey
