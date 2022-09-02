@@ -1,1 +1,39 @@
 
+
+--| define data type Game + use parameters
+-- players define by public key
+-- # of lovelace to stake 
+-- Two slots (gPlayDeadline = make a move) + (gRevealDeadline = show how u won)
+-- gToken = Arbitrary NFT to identify UTXO 
+
+data Game = Game
+    { gFirst          :: !PubKeyHash
+    , gSecond         :: !PubKeyHash
+    , gStake          :: !Integer
+    , gPlayDeadline   :: !Slot
+    , gRevealDeadline :: !Slot
+    , gToken          :: !AssetClass
+    } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
+
+--| Next, we define the two moves that the players can make (Zero & One)
+-- need Plutus Eq for the instance,
+-- Inlinable pragma on Plutus Eq for the GameChoice
+data GameChoice = Zero | One
+    deriving (Show, Generic, FromJSON, ToJSON, ToSchema, Prelude.Eq, Prelude.Ord)
+
+instance Eq GameChoice where
+    {-# INLINABLE (==) #-}
+    Zero == Zero = True
+    One  == One  = True
+    _    == _    = False
+
+--| For state, we will use a type called GameDatum.
+-- ByteString is the hash that the first player submits
+-- Maybe GameChoice is either Just the move of the second player, or Nothing 
+-- add constructor Finished for final state transition
+ data GameDatum = GameDatum Bytestring (Maybe GameChoice) | Finished
+ deriving Show
+ 
+ instance Eq GameDatum where
+ {-# INLINABLE (==) #-}
+ GameDatum bs mc == GameDatum bs' mc' = (bs == bs') && (mc == mc')
