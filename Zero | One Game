@@ -301,6 +301,8 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
                           
                           void $ awaitSlot $ 1 + spRevealDeadline sp
                           
+                         --| If you can still find UTxO 1st player didn't reveal
+                         -- Second player claims
                           m' <- findGameOutput game 
                           case m' of
                               Nothing               -> logInfo @String "first player won"
