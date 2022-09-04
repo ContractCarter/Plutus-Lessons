@@ -1,3 +1,4 @@
+Monads are pure functions that Manage side effects
 
 
 --|(>>=)         :: IO a            -> (a -> IO b)             -> IO b
