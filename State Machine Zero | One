@@ -37,3 +37,58 @@ instance Eq GameChoice where
  instance Eq GameDatum where
  {-# INLINABLE (==) #-}
  GameDatum bs mc == GameDatum bs' mc' = (bs == bs') && (mc == mc')
+ Finished        == Finished          = True
+ _               == _                 = Flase
+ 
+ PlutusTx.unstableMakeIsData ''GameDatum
+ 
+ data GameRedeemer = Play GameChoice | Reveal ByteString | ClaimFirst | ClaimSecond
+     deriving Show 
+  
+PlutusTx.unstableMakeIsData ''GameRedeemer
+
+{-# INLINABLE lovelaces #-}
+lovelaces :: Value -> Integer
+lovelaces = Ada.getLovelace . Ada.fromValue
+
+{-# INLINABLE gameDatum #-}
+gameDatum :: TxOut -> (DatumHash -> Maybe Datum) -> Maybe GameDatum
+gameDatum o f = do 
+    dh      <- txOutDatum o
+    Datum d <- f dh
+    PlutusTx.fromData d
+    
+ {-# INLINABLE transition #-}
+ transition :: Game -> State GameDatum -> GameRedeemer -> Maybe (TxConstraints Void Void, State GameDatum)
+ transition game s r = case (stateValue s, stateData s, r) of
+     (v, GameDatum bs Nothing, Play c) 
+         | lovelaces v  == gStake game        -> Just ( Constraints.mustBeSignedBy (gSecond game)                    <>
+                                                        Constraint.mustValidateIn (to $ gPlayDeadline game)
+                                                      , State (GameDatum bs $ Just c) (lovelaceValueOf $ 2 * gStake game) 
+                                                      )
+     (v, GameDatum _ (Just _), Reval _)
+         | lovelaces v == (2 * gStake game)   -> Just ( Constraints.mustBeSignedBy (gFirst game)                      <>
+                                                        Constraints.mustValidateIn (to $ gRevealDeadline game)        <>
+                                                        Constraints.mustPayToPubKey (gFirst game) token 
+                                                      , State Finished mempty
+                                                      )
+                                                      
+     (v, GameDatum _ (Just _), ClaimFirst)
+         | lovelaces v == (2 * gStake game)   -> Just ( Constraints.mustBeSignedBy (gFirst game)                      <>
+                                                        Constraints.mustValidateIn (from $ 1 + gPlayDeadline game)        <>
+                                                        Constraints.mustPayToPubKey (gFirst game) token 
+                                                      , State Finished mempty
+                                                      )
+                                                      
+     (v, GameDatum _ (Just _), ClaimSecond _)
+         | lovelaces v == (2 * gStake game)   -> Just ( Constraints.mustBeSignedBy (gSecond game)                          <>
+                                                        Constraints.mustValidateIn (from $1 + gRevealDeadline game)        <>
+                                                        Constraints.mustPayToPubKey (gFirst game) token 
+                                                      , State Finished mempty
+                                                      )                                                  
+                                                      
+                                                      
+                                                      
+                                                      
+                                                      
+                                                      
