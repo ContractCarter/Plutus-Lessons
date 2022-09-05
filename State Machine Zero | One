@@ -86,9 +86,65 @@ gameDatum o f = do
                                                         Constraints.mustPayToPubKey (gFirst game) token 
                                                       , State Finished mempty
                                                       )                                                  
+                                              -> Nothing 
+     _
+    where
+      token :: Value 
+      token = assetClassValue (gToken game) 1
+      
+    {-# INLINABLE final #-}
+    final :: GameDatum -> Bool 
+    final Finished = True 
+    final _        = False
                                                       
-                                                      
-                                                      
+    {-# INLINABLE check #-}
+    check :: ByteString -> ByteString -> GameDatum -> GameRedeemer -> ScriptContent -> Bool
+    check bsZero' bsOne' (GameDatum bs (Just c)) (Reveal nonce) _ =
+         sha2_256 (nonce 'concatenate' if c == Zero then bsZero' else bsOne') == bs
+    check _        _      _                       _              _ = True
+    
+    {-# INLINABLE gameStateMachine #-}
+    gameStateMachine :: Game -> ByteString -> ByteString -> StateMachine GameDatum GameRedeemer
+    gameStateMachine game bsZero' bsOne' = StateMachine
+        { smTransition  = transition game 
+        , smFinal       = final 
+        , smCheck       = check bsZero' bsOne'
+        , smThreadToken = Just $ gToken game 
+        }
+        
+    {-# INLINABLE mkGameValidator #-}
+    mkGameValidator :: Game -> ByteString -> ByteString -> GameDatum -> GameRedeemer -> ScriptContext -> Bool
+    mkGameValidator game bsZero' bsOne' = mkValidator $ gameStateMachine  bsZero' bsOne'
+    
+    type Gaming = StateMachine GameDatum GameRedeemer
+    
+    bsZero, bsOne :: ByteString
+    bsZero = "0"
+    bsOne  = "1"
+    
+    gameStateMachine' :: Game -> StateMachine GameDatum Game Redeemer
+    gameStateMachine' game = gameStateMachine game bsZero bsOne 
+    
+    gameInst :: Game -> Scripts.ScriptInstance Gaming
+    gameInst game = Scripts.validator @Gaming
+        ($$(PlutusTx.compile [|| mkGameValidator ||])
+            'PlutusTx.applyCode' PlutusTx.liftCode game
+            'PlutusTx.applyCode' PlutusTx.liftCode bsZero
+            'PlutusTx.applyCode' PlutusTx.liftCode bsOne)
+          $$(PlutusTx.compile [|| wrap ||])
+         where
+           wrap = Scripts.wrapValidator @GameDatum @GameRedeemer
+           
+     gameValidator :: Game -> Validator
+     gameValidator = Scripts.validatorScript . gameInst
+     
+     gameAddress :: Game -> Ledger.Address
+     gameAddress = scriptAddress . gameValidator 
+     
+     gameClient :: Game -> StateMacineClient GameDatum GameRedeemer
+     gameClient game = mkStateMachineClient $ StateMachineInstance (gameStateMachine' game) (gameInst game)
+     
+     
                                                       
                                                       
                                                       
