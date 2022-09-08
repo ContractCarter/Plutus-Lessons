@@ -158,5 +158,19 @@ gameDatum o f = do
          mapError' :: Contract w s SMContractError a -> Contract w s Text a
          mapError' = mapError $ pack. show
                                                       
-                                                      
-                                                      
+         firstGame :: forall w s. HasBlockchainActions s => FirstParams -> Contract w s Text ()
+         firstGame fp = do
+             pkh  <- pubKeyHash <$> Contract.ownPubKey
+             let game    = Game 
+                     { gFirst             = pkh
+                     , gSecond            = fpSecond fp
+                     , gStake             = fpStake fp
+                     , gPlayDeadline      = fpRevealDeadline fp
+                     , gRevealDeadline    = fpRevealDeadline fp
+                     , gToken             = AssetClass (fpCurrency fp, fpTokenName fp)
+                     }
+                 client = gameClient game 
+                 v      = lovelaceValueOf (fpStake fp)
+                 c      = fpChoice fp
+                 bs     = sha2_256 $fpNonce fp 'concatenate' if c == Zero then bsZero else bsOne
+                 
