@@ -38,7 +38,7 @@ instance Eq GameChoice where
  {-# INLINABLE (==) #-}
  GameDatum bs mc == GameDatum bs' mc' = (bs == bs') && (mc == mc')
  Finished        == Finished          = True
- _               == _                 = Flase
+ _               == _                 = False
  
  PlutusTx.unstableMakeIsData ''GameDatum
  
@@ -173,4 +173,24 @@ gameDatum o f = do
                  v      = lovelaceValueOf (fpStake fp)
                  c      = fpChoice fp
                  bs     = sha2_256 $fpNonce fp 'concatenate' if c == Zero then bsZero else bsOne
+              void $ mapError @w @s @SMContractError (pack . show) $ runInitialise client (GameDatum bs Nothing) v
+              logInfo @String $ "made first move: " ++ show (fpChoice fp)
+              
+              void $ awaitSlot $ 1 + fpPlayDeadline fp 
+              
+              m <- mapError' $ getOnChainState client
+              case m of 
+                  Nothing              -> throwError "game output not found"
+                  Just ((o, _), _) -> case tyTxOutData o of 
+                  
+                       GameDatum _ Nothing -> do 
+                           logInfo @String "second player did not play"
+                           void $ mapError' $ runStep client ClaimFirst
+                           logInfo @String "first player reclaimed stake"
                  
+                      GameDatum _ (Just c') | c' == c -> do 
+                          logInfo @String "second player played and lost"
+                          void $ mapError' $ runStep client $ Reveal $ fpNonce fp
+                          logInfo @String "first player revealed and won"
+                          
+                      _ -> logInfo @String "second player played and won"
