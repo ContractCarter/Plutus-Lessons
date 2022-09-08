@@ -150,6 +150,13 @@ gameDatum o f = do
          , fpPlayDeadline      :: !Slot
          , fpRevealDeadline    :: !Slot
          , fpNonce             :: !ByteString
+         , fpCurrency          :: !CurrencySymbol
+         , fpTokenName         :: !TokenName
+         , fpChoice            :: !GameChoice
+         } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
+         
+         
+         
                                                       
                                                       
                                                       
