@@ -66,7 +66,7 @@ gameDatum o f = do
                                                         Constraint.mustValidateIn (to $ gPlayDeadline game)
                                                       , State (GameDatum bs $ Just c) (lovelaceValueOf $ 2 * gStake game) 
                                                       )
-     (v, GameDatum _ (Just _), Reval _)
+     (v, GameDatum _ (Just _), Reveal _)
          | lovelaces v == (2 * gStake game)   -> Just ( Constraints.mustBeSignedBy (gFirst game)                      <>
                                                         Constraints.mustValidateIn (to $ gRevealDeadline game)        <>
                                                         Constraints.mustPayToPubKey (gFirst game) token 
@@ -144,7 +144,12 @@ gameDatum o f = do
      gameClient :: Game -> StateMacineClient GameDatum GameRedeemer
      gameClient game = mkStateMachineClient $ StateMachineInstance (gameStateMachine' game) (gameInst game)
      
-     
+     data FirstParams = FirstParams
+         { fpSecond            :: !PubKeyHash
+         , fpStake             :: !Integer
+         , fpPlayDeadline      :: !Slot
+         , fpRevealDeadline    :: !Slot
+         , fpNonce             :: !ByteString
                                                       
                                                       
                                                       
