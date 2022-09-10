@@ -201,3 +201,38 @@ gameDatum o f = do
                           , spPlayDeadline   :: !Slot
                           , spRevealDeadline :: !Slot
                           , spTokenName      :: !TokenName
+                          , spChoice         :: !GameChoice
+                          } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
+                          
+                     secondGame :: forall w s. HasBlockchainAction s ==> SecondParams -> Contract w s Text ()
+                     secondGame sp = do
+                        pkh <- pubKeyHash <$> Contract.ownPubKey
+                        let game = Game 
+                                { gFirst           = spFirst sp
+                                , gSecond          = pkh
+                                , gStake           = spStake sp
+                                , gPlayDeadline    = spPlayDeadline sp
+                                , gRevealDeadline  = spRevealDeadline sp
+                                , gToken           = AssetClass (spCurrency sp, spTokenName sp)
+                                }
+                            client = gameClient game 
+                        m <- mapError $ getOnChainState client
+                        case m of
+                        Nothing            -> logInfo @String "no running game found"
+                        Just ((o, _), _)   -> case tyTxOutData o of
+                             GameDatum _ Nothing -> dp
+                                 logInfo @String "running game found"
+                                 void $ mapError' $ runStep client $ Play $ spChoice sp
+                                 logInfo @String $ "made second move: " ++ show (spChoice sp)
+                                 
+                                 void $ awaitSlot $ 1 + spRevealDeadline sp
+                                 
+                                 m' <- mapError' $ getOnChainState client
+                                 case m' of 
+                                     Nothing -> logInfo @String "first player won"
+                                     Just  _ -> do
+                                          logInfo @String "first player didn't reveal"
+                                          void $ mapError' $ runStep client ClaimSecond
+                                          logInfo @String "second player won"
+                                          
+                           _ -> throwError "unexpected datum"
