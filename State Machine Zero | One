@@ -236,3 +236,12 @@ gameDatum o f = do
                                           logInfo @String "second player won"
                                           
                            _ -> throwError "unexpected datum"
+                           
+               type GameSchema = BlockchainActions .\/ Endpoint "first" FirstParams .\/ Endpoint "second" SecondParams
+               
+               endpoints :: Contract () GameSchema Text ()
+               endpoints = (first 'select' second) >> endpoints
+                 where
+                   first = endpoint @"first"  >>+ firstGame 
+                  second = endpoint @"second" >>= secondGame
+            
