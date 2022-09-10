@@ -194,3 +194,10 @@ gameDatum o f = do
                           logInfo @String "first player revealed and won"
                           
                       _ -> logInfo @String "second player played and won"
+                      
+                      data SecondParams = SecondParams
+                          { spFirst          :: !PubKeyHash
+                          , spStake          :: !Integer
+                          , spPlayDeadline   :: !Slot
+                          , spRevealDeadline :: !Slot
+                          , spTokenName      :: !TokenName
