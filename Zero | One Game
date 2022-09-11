@@ -154,6 +154,7 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
  nftToFirst :: Bool
  nftToFirst = assetClassValueOf (valuePaidTo info $ gFirst game) (gToken game) == 1
  
+ --| bundle datum and redeemer into a Gaming type.
  data Gaming 
  instance Scripts.ScriptType Gaming where
      type instance DatumType Gaming = GameDatum
