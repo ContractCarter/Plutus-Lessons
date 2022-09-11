@@ -154,7 +154,11 @@ gameDatum o f = do
          , fpTokenName         :: !TokenName
          , fpChoice            :: !GameChoice
          } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
-         
+     
+     --| state machine contracts provided by the state machine module have a specific constraint on the error type
+     --  One error type that works is SMContractError
+     -- use a helper function to convert the SMContractError type into a Text type
+     --  Text as the error type
          mapError' :: Contract w s SMContractError a -> Contract w s Text a
          mapError' = mapError $ pack. show
                                                       
