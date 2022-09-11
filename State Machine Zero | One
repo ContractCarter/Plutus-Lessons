@@ -161,7 +161,8 @@ gameDatum o f = do
      --  Text as the error type
          mapError' :: Contract w s SMContractError a -> Contract w s Text a
          mapError' = mapError $ pack. show
-                                                      
+         
+         --| first player contract is shorter 
          firstGame :: forall w s. HasBlockchainActions s => FirstParams -> Contract w s Text ()
          firstGame fp = do
              pkh  <- pubKeyHash <$> Contract.ownPubKey
@@ -173,14 +174,17 @@ gameDatum o f = do
                      , gRevealDeadline    = fpRevealDeadline fp
                      , gToken             = AssetClass (fpCurrency fp, fpTokenName fp)
                      }
+                 --| Take client + values    
                  client = gameClient game 
                  v      = lovelaceValueOf (fpStake fp)
                  c      = fpChoice fp
                  bs     = sha2_256 $fpNonce fp 'concatenate' if c == Zero then bsZero else bsOne
+                 
+               --| runIntialise function starts a state machine and creates a UTxO at the state machine address
               void $ mapError @w @s @SMContractError (pack . show) $ runInitialise client (GameDatum bs Nothing) v
               logInfo @String $ "made first move: " ++ show (fpChoice fp)
-              
-              void $ awaitSlot $ 1 + fpPlayDeadline fp 
+             
+             void $ awaitSlot $ 1 + fpPlayDeadline fp 
               
               m <- mapError' $ getOnChainState client
               case m of 
