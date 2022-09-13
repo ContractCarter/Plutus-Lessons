@@ -144,6 +144,8 @@ gameDatum o f = do
      gameClient :: Game -> StateMacineClient GameDatum GameRedeemer
      gameClient game = mkStateMachineClient $ StateMachineInstance (gameStateMachine' game) (gameInst game)
      
+     --| Start contract on 1st player wallet
+     -- need second player address
      data FirstParams = FirstParams
          { fpSecond            :: !PubKeyHash
          , fpStake             :: !Integer
@@ -203,7 +205,9 @@ gameDatum o f = do
                           
                       _ -> logInfo @String "second player played and won"
                       
-                      data SecondParams = SecondParams
+                     --| Start contract on Second player Wallet
+                     -- need first player address
+                     data SecondParams = SecondParams
                           { spFirst          :: !PubKeyHash
                           , spStake          :: !Integer
                           , spPlayDeadline   :: !Slot
