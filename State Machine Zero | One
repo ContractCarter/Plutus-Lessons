@@ -172,7 +172,7 @@ gameDatum o f = do
                      { gFirst             = pkh
                      , gSecond            = fpSecond fp
                      , gStake             = fpStake fp
-                     , gPlayDeadline      = fpRevealDeadline fp
+                     , gPlayDeadline      = fpPlayDeadline fp
                      , gRevealDeadline    = fpRevealDeadline fp
                      , gToken             = AssetClass (fpCurrency fp, fpTokenName fp)
                      }
