@@ -236,13 +236,14 @@ gameDatum o f = do
                         case m of
                         Nothing            -> logInfo @String "no running game found"
                         Just ((o, _), _)   -> case tyTxOutData o of
-                             GameDatum _ Nothing -> dp
+                             GameDatum _ Nothing -> do
                                  logInfo @String "running game found"
                                  void $ mapError' $ runStep client $ Play $ spChoice sp
                                  logInfo @String $ "made second move: " ++ show (spChoice sp)
-                                 
+                               
                                  void $ awaitSlot $ 1 + spRevealDeadline sp
                                  
+                             --| UTxO contains NFT       
                                  m' <- mapError' $ getOnChainState client
                                  case m' of 
                                      Nothing -> logInfo @String "first player won"
