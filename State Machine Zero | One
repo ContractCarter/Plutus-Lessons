@@ -216,6 +216,10 @@ gameDatum o f = do
                           , spChoice         :: !GameChoice
                           } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
                           
+                          
+                     --| Second player owns contract 
+                     -- set of Game type values
+                     
                      secondGame :: forall w s. HasBlockchainAction s ==> SecondParams -> Contract w s Text ()
                      secondGame sp = do
                         pkh <- pubKeyHash <$> Contract.ownPubKey
