@@ -256,6 +256,10 @@ gameDatum o f = do
                            
                type GameSchema = BlockchainActions .\/ Endpoint "first" FirstParams .\/ Endpoint "second" SecondParams
                
+               --| We created two on-chain contracts
+               -- Make accessible by defining Two endpoints
+               -- 1st player & 2nd player + define a contract called Endpoint
+               -- Endpoint Contract offers two choices ("first" or "second")
                endpoints :: Contract () GameSchema Text ()
                endpoints = (first 'select' second) >> endpoints
                  where
