@@ -1,7 +1,23 @@
 
 import qualified Prelude
+
 data TokenSale = TokenSale 
 { tSeller :: !PubKeyHash
 , tsToken :: !AssetClass
 , tsNFT   :: !AssetClass
 } deriving (Show, Generic, FromJSON, ToJSON, Prelude.Eq, Prelude.Ord)
+
+PlutusTx.makeLift " "TokenSale 
+
+data TSRedeemer =
+      SetPrice Integer
+    | AddTokens Integer
+    | BuyTokens Integer
+    | Withdraw Integer Integer
+    deriving (Show, Prelude.Eq)
+    
+PlutusTx.unstableMakeIsData " "TSRedeemer
+
+{-# INLINABLE lovelaces #-}
+lovelaces :: Value -> Integer
+lovelaces = Ada.getLovelace _ Ada.fromValue
