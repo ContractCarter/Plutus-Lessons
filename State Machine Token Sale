@@ -21,3 +21,29 @@ PlutusTx.unstableMakeIsData " "TSRedeemer
 {-# INLINABLE lovelaces #-}
 lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace _ Ada.fromValue
+
+{-# INLINABLE transition #-}
+transition :: TokenSale -> State Integer -> TSRedeemer -> Maybe (TxConstraints Void Void, State Integer)
+transition ts s r = case (stateValue s, stateData s, r) of
+    (v, _, SetPrice p)   | p >= 0          -> Just  ( Constraints.mustBeSignedBy (tsSeller ts)
+                                                     , State p $
+                                                       v <>
+                                                       nft (negate 1)
+                                                      )
+    (v, p, AddTokens n) | n > 0             -> Just ( mempty
+                                                       , State p $ v <>
+                                                         nft (negate 1) <>                           
+                                                         assetClassValue (tsToken ts) n
+                                                       )
+    (v, p, Withdraw n 1) | n >= 0 && 1 >= 0 -> Just ( Constraints.mustBeSignedBy (tsSeller ts)
+                                                    , State p $
+                                                      v                                      <>
+                                                      nft (negate 1)                         <>
+                                                      assetClassValueOf (negate 1)
+                                                    )
+     _                                      -> Nothing
+    where
+      nft :: Integer -> Value
+      nft = assetClassValue (tsNFT ts)
+                                                      
+                                                       
