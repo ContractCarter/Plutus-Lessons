@@ -45,5 +45,22 @@ transition ts s r = case (stateValue s, stateData s, r) of
     where
       nft :: Integer -> Value
       nft = assetClassValue (tsNFT ts)
-                                                      
+   
+   type TS = StateMachine Integer TSRedeemer
+
+tsInst :: TokenSale -> Scripts.ScriptInstance TS
+tsInst ts = Scripts.validator @TS
+    ($$(PlutusTx.compile [|| mkTSValidator ||]) `PlutusTx.applyCode` PlutusTx.liftCode ts)
+    $$(PlutusTx.compile [|| wrap ||])
+  where
+    wrap = Scripts.wrapValidator @Integer @TSRedeemer
+
+tsValidator :: TokenSale -> Validator
+tsValidator = Scripts.validatorScript . tsInst
+
+tsAddress :: TokenSale -> Ledger.Address
+tsAddress = scriptAddress . tsValidator
+
+tsClient :: TokenSale -> StateMachineClient Integer TSRedeemer
+tsClient ts = mkStateMachineClient $ StateMachineInstance (tsStateMachine ts) (tsInst ts)
                                                        
