@@ -28,7 +28,10 @@ lovelaces = Ada.getLovelace _ Ada.fromValue
 --| Script Address
 -- TokenSale parameter holds state machine  config value, Redeemer, a Just constraints holding new state 
 -- We must remove the NFT (negate 1) due to Plutus library adding it again
---
+-- mempty needs no constraints meaning anyone can participate 
+-- AddTokens Redeemer check seller address return new sate without constraints (no constraints)
+-- BuyTokens Redeemer any address can buy tokens 
+-- Withdraw Redeemer Tokens and lovelaces in the contract 
 {-# INLINABLE transition #-}
 transition :: TokenSale -> State Integer -> TSRedeemer -> Maybe (TxConstraints Void Void, State Integer)
 transition ts s r = case (stateValue s, stateData s, r) of
@@ -42,6 +45,15 @@ transition ts s r = case (stateValue s, stateData s, r) of
                                                          nft (negate 1) <>                           
                                                          assetClassValue (tsToken ts) n
                                                        )
+                                                       
+    (v, p, BuyTokens n) | n > 0 -> ( mempty
+                                   , State p $
+                                     v                                       <>
+                                     nft (negate 1)                          <>
+                                     assetClassValue (tsToken ts) (negate n) <>
+                                     lovelaceValueOf (n * p)
+                                    )
+                                    
     (v, p, Withdraw n 1) | n >= 0 && 1 >= 0 -> Just ( Constraints.mustBeSignedBy (tsSeller ts)
                                                     , State p $
                                                       v                                      <>
