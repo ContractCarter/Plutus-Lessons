@@ -1,6 +1,8 @@
 
 import qualified Prelude
 
+--| data type
+-- seller public keys, Token, NFT identifying UTxO
 data TokenSale = TokenSale 
 { tsSeller :: !PubKeyHash
 , tsToken :: !AssetClass
@@ -10,10 +12,10 @@ data TokenSale = TokenSale
 PlutusTx.makeLift " "TokenSale 
 
 data TSRedeemer =
-      SetPrice Integer
-    | AddTokens Integer
-    | BuyTokens Integer
-    | Withdraw Integer Integer
+      SetPrice Integer          -- price
+    | AddTokens Integer.        -- add Tokens
+    | BuyTokens Integer         -- buy Tokens
+    | Withdraw Integer Integer  -- Withdraw Tokens + lovelaces
     deriving (Show, Prelude.Eq)
     
 PlutusTx.unstableMakeIsData " "TSRedeemer
