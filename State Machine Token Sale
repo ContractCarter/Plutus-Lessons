@@ -20,10 +20,13 @@ data TSRedeemer =
     
 PlutusTx.unstableMakeIsData " "TSRedeemer
 
+--| lovelace helper function
 {-# INLINABLE lovelaces #-}
 lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace _ Ada.fromValue
 
+--| Script Address
+--| TokenSale parameter holds state machine  config value, Redeemer, a Just constraints holding new state 
 {-# INLINABLE transition #-}
 transition :: TokenSale -> State Integer -> TSRedeemer -> Maybe (TxConstraints Void Void, State Integer)
 transition ts s r = case (stateValue s, stateData s, r) of
