@@ -26,7 +26,9 @@ lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace _ Ada.fromValue
 
 --| Script Address
---| TokenSale parameter holds state machine  config value, Redeemer, a Just constraints holding new state 
+-- TokenSale parameter holds state machine  config value, Redeemer, a Just constraints holding new state 
+-- We must remove the NFT (negate 1) due to Plutus library adding it again
+--
 {-# INLINABLE transition #-}
 transition :: TokenSale -> State Integer -> TSRedeemer -> Maybe (TxConstraints Void Void, State Integer)
 transition ts s r = case (stateValue s, stateData s, r) of
@@ -48,6 +50,8 @@ transition ts s r = case (stateValue s, stateData s, r) of
                                                     )
      _                                      -> Nothing
     where
+    
+    --| helper function to reference NFT
       nft :: Integer -> Value
       nft = assetClassValue (tsNFT ts)
    
