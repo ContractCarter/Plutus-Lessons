@@ -69,6 +69,7 @@ transition ts s r = case (stateValue s, stateData s, r) of
    
    type TS = StateMachine Integer TSRedeemer
 
+--| compile 
 tsInst :: TokenSale -> Scripts.ScriptInstance TS
 tsInst ts = Scripts.validator @TS
     ($$(PlutusTx.compile [|| mkTSValidator ||]) `PlutusTx.applyCode` PlutusTx.liftCode ts)
