@@ -66,10 +66,10 @@ transition ts s r = case (stateValue s, stateData s, r) of
     --| helper function to reference NFT
       nft :: Integer -> Value
       nft = assetClassValue (tsNFT ts)
-   
+      
+--| Boiler plate code to compile   
    type TS = StateMachine Integer TSRedeemer
 
---| compile 
 tsInst :: TokenSale -> Scripts.ScriptInstance TS
 tsInst ts = Scripts.validator @TS
     ($$(PlutusTx.compile [|| mkTSValidator ||]) `PlutusTx.applyCode` PlutusTx.liftCode ts)
