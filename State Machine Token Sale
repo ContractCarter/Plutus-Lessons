@@ -98,4 +98,19 @@ mapErrorSM = mapError $ pack . show
 nftName :: TokenName
 nftName = "NFT"
 
-                                                       
+startTs :: HasBlockchainActions s => Maybe CurrencySymbol -> AssetClass -> Contract (Last TokenSale) s Text TokenSale 
+startTs mcs token = do
+    pkh <- pubKeyHash <$> Contract.ownPubKey
+    cs  <- case mcs of
+        Nothing  -> C.currencySymbol <$> mapErrorC (C.forgeContract pkh [(nftName, 1)])
+        Just cs' -> return cs'
+    let ts = TokenSale 
+            {  tsSeller = pkh
+            ,  tsToken  = token
+            ,  tsNFT    = AssetClass (cs, nftName)
+            }
+         client = tsClient ts
+     void $ mappErrorSM $ runInitialise client 0 mempty
+     tell $ Last $ Just ts
+     logInfo $ "start token sale" ++ show ts
+     return ts
