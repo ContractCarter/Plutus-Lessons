@@ -109,12 +109,14 @@ startTs mcs token = do
     cs  <- case mcs of
         Nothing  -> C.currencySymbol <$> mapErrorC (C.forgeContract pkh [(nftName, 1)])
         Just cs' -> return cs'
+--| define TokenSale create state machine client        
     let ts = TokenSale 
             {  tsSeller = pkh
             ,  tsToken  = token
             ,  tsNFT    = AssetClass (cs, nftName)
             }
          client = tsClient ts
+--| write ts in log, log a message, return  ts       
      void $ mappErrorSM $ runInitialise client 0 mempty
      tell $ Last $ Just ts
      logInfo $ "start token sale" ++ show ts
