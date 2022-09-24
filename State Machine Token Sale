@@ -94,10 +94,15 @@ mapErrorSM :: Contract w s SMContractError a -> Contract w s Text a
 mapErrorSM = mapError $ pack . show
 
 --| Off-chain code 
-
+-- define NFT TokenName
 nftName :: TokenName
 nftName = "NFT"
 
+--| 1st contract is starting token sale
+-- contract invoked by Seller's pub key hash
+-- mint nft with 1st argument (Maybe CurrencySymbol)
+-- AssetClass token seller wants to trade
+-- return type using writer monad type Last (once TokenSale is setup other contracts discover it)
 startTs :: HasBlockchainActions s => Maybe CurrencySymbol -> AssetClass -> Contract (Last TokenSale) s Text TokenSale 
 startTs mcs token = do
     pkh <- pubKeyHash <$> Contract.ownPubKey
