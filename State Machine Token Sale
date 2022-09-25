@@ -121,3 +121,6 @@ startTs mcs token = do
      tell $ Last $ Just ts
      logInfo $ "start token sale" ++ show ts
      return ts
+     
+  setPrice :: HasBlockchainActions s => TokenSale -> Integer -> Contract w s Text ()
+  setPrice ts p = void $ mapErrorSM $ runStep (tsClient ts) $ SetPrice p
