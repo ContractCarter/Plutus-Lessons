@@ -145,3 +145,21 @@ startTs mcs token = do
       .\/ Endpoint "buy tokens" Integer
       .\/ Endpoint "withdraw" (Integer, Integer)
       
+  startEndpoint :: Contract (Last TokenSale) TSStartSchema Text ()
+  startEndpoint = startTS' >> startEndpoint
+    where
+     startTS' = handleError logError $ endpoint @"start" >>= void . startTS Nothing . AssetClass
+     
+  startEndpoint' :: Contract ( Last TokenSale) TSStartSchema' Text ()
+  startEndpoint' = startTS' >> startEndpoint'
+    where
+      startTS' = handleError logError $ endpoint @"start" >>= \(cs1, cs2, tn) -> void $ startTS (Just cs1) $ AssetClass (cs2, tn)
+ 
+ useEndpoints :: TokenSale -> Contract () TSUseSchema Text ()
+ useEndpoints ts = (setPrice' 'select' addTokens' 'select' buyTokens' 'select' withdraw') >> useEndpoints ts
+   where
+     setPrice'  = handleError  logError $ endpoint @"set price"  >>= setPrice ts
+     addTokens' = handleError  logError $ endpoint @"add tokens" >>= addTokens ts
+     buyTokens' = handleError  logError $ endpoint @"buy tokens" >>= buyTokens ts
+     withdraw'  = handdleError logError $ endpoint @"withdraw"   >>= uncurry (withdraw ts)
+      
