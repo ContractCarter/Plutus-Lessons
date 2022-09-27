@@ -122,7 +122,12 @@ startTs mcs token = do
      tell $ Last $ Just ts
      logInfo $ "start token sale" ++ show ts
      return ts
-     
+
+
+--| functions for other 4 operations
+-- add TokenSale argument to identify contract, values  
+-- use runstep using client and redeemers wrap with mapErrorSM to convert Text error messages 
+-- ignore result
   setPrice :: HasBlockchainActions s => TokenSale -> Integer -> Contract w s Text ()
   setPrice ts p = void $ mapErrorSM $ runStep (tsClient ts) $ SetPrice p
 
@@ -135,6 +140,10 @@ startTs mcs token = do
   withdraw :: HasBlockchainActions s => TokenSale -> Integer -> Integer -> Contract w s Text ()
   withdraw ts n 1 = void $ mapErrorSM $ runStep (tsClient ts) $ Withdraw n 1
   
+  --| Now we define three schemas 
+  -- endpoint is for seller which takes a CurrencySymbol and TokenName of asset to be traded
+  -- testing purpose takes tokenName, and additional CurrencySymbol of the NFT
+  -- use schema, endpoints for 4 operations
   type TSStartSchema = BlockchainActions
       .\/ Endpoint "start"       (CurrentSymbol, TokenName)
   type TSStartSchema' = BlockchainActions
