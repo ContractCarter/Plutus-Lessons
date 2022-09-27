@@ -21,7 +21,6 @@ data TSRedeemer =
 PlutusTx.unstableMakeIsData " "TSRedeemer
 
 --| lovelace helper function
--- reference smart contract
 {-# INLINABLE lovelaces #-}
 lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace _ Ada.fromValue
@@ -65,6 +64,7 @@ transition ts s r = case (stateValue s, stateData s, r) of
     where
     
     --| helper function to reference NFT
+    -- reference smart contract 
       nft :: Integer -> Value
       nft = assetClassValue (tsNFT ts)
       
@@ -127,7 +127,7 @@ startTs mcs token = do
   setPrice ts p = void $ mapErrorSM $ runStep (tsClient ts) $ SetPrice p
 
   addTokens :: HasBlockchainActions s => TokenSale -> Integer -> Contract w s Text ()
-  addTokens ts n = void $ mapErrorSM $ runStep (tsClient ts) $ AddToken n)
+  addTokens ts n = void $ (mapErrorSM $ runStep (tsClient ts) $ AddToken n)
   
   buyTokens :: HasBlockchainActions s => TokenSale -> Integer -> Contract w s Text ()
   buyTokens ts n = void $ mapErrorSM $ runStep (tsClient ts) $ BuyTokens n
