@@ -21,6 +21,7 @@ data TSRedeemer =
 PlutusTx.unstableMakeIsData " "TSRedeemer
 
 --| lovelace helper function
+-- reference smart contract
 {-# INLINABLE lovelaces #-}
 lovelaces :: Value -> Integer
 lovelaces = Ada.getLovelace _ Ada.fromValue
