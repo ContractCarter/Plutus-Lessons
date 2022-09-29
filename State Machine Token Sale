@@ -145,20 +145,21 @@ startTs mcs token = do
   -- testing purpose takes tokenName, and additional CurrencySymbol of the NFT
   -- use schema, endpoints for 4 operations
   type TSStartSchema = BlockchainActions
-      .\/ Endpoint "start"       (CurrentSymbol, TokenName)
+      .\/ Endpoint "start"       (CurrencySymbol, TokenName)
   type TSStartSchema' = BlockchainActions
-      .\/ Endpoint "start"       (CurrentSymbol, CurrencySymbol, TokenName)
+      .\/ Endpoint "start"       (CurrencySymbol, CurrencySymbol, TokenName)
   type TSUseSchema = BlockchainActions
       .\/ Endpoint "set price" Integer
       .\/ Endpoint "add tokens" Integer
       .\/ Endpoint "buy tokens" Integer
       .\/ Endpoint "withdraw" (Integer, Integer)
-      
+ --| Start endpint calls startTS with Nothing (has to be minted), wrap in handleError (log Error)    
   startEndpoint :: Contract (Last TokenSale) TSStartSchema Text ()
   startEndpoint = startTS' >> startEndpoint
     where
      startTS' = handleError logError $ endpoint @"start" >>= void . startTS Nothing . AssetClass
-     
+ 
+ --| startEndpoint function add NFT parameter, as per TSStartSchema 
   startEndpoint' :: Contract ( Last TokenSale) TSStartSchema' Text ()
   startEndpoint' = startTS' >> startEndpoint'
     where
