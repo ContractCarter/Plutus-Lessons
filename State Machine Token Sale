@@ -101,7 +101,7 @@ nftName = "NFT"
 
 --| 1st contract is starting token sale
 -- contract invoked by Seller's pub key hash
--- mint nft with 1st argument (Maybe CurrencySymbol)
+-- if Nothing mint nft with 1st argument (Maybe CurrencySymbol)
 -- AssetClass token seller wants to trade
 -- return type using writer monad type Last (once TokenSale is setup other contracts discover it)
 startTs :: HasBlockchainActions s => Maybe CurrencySymbol -> AssetClass -> Contract (Last TokenSale) s Text TokenSale 
@@ -117,15 +117,17 @@ startTs mcs token = do
             ,  tsNFT    = AssetClass (cs, nftName)
             }
          client = tsClient ts
---| write ts in log, log a message, return  ts       
+--| runInitialise function starts state machine + creates UTxO at state machine address
+-- takes client as 1st argument with a initial value of 0 + no initial funds except NFT
+-- write ts in log, log a message, return  ts       
      void $ mappErrorSM $ runInitialise client 0 mempty
      tell $ Last $ Just ts
      logInfo $ "start token sale" ++ show ts
      return ts
 
 
---| functions for other 4 operations
--- add TokenSale argument to identify contract, values  
+--| functions for the other 4 operations
+-- add TokenSale argument to identify contract + new values  
 -- use runstep using client and redeemers wrap with mapErrorSM to convert Text error messages 
 -- ignore result
   setPrice :: HasBlockchainActions s => TokenSale -> Integer -> Contract w s Text ()
@@ -141,9 +143,9 @@ startTs mcs token = do
   withdraw ts n 1 = void $ mapErrorSM $ runStep (tsClient ts) $ Withdraw n 1
   
   --| Now we define three schemas 
-  -- endpoint is for seller which takes a CurrencySymbol and TokenName of asset to be traded
-  -- testing purpose takes tokenName, and additional CurrencySymbol of the NFT
-  -- use schema, endpoints for 4 operations
+  --  1st schema for seller takes the CurrencySymbol and TokenName of the asset to be traded
+  --  2nd schema used for testing purpose takes TokenName, and additional CurrencySymbol of the NFT
+  -- lastly we use a Schema (TSUseSchema), with endpoints for the 4 operations
   type TSStartSchema = BlockchainActions
       .\/ Endpoint "start"       (CurrencySymbol, TokenName)
   type TSStartSchema' = BlockchainActions
@@ -153,7 +155,8 @@ startTs mcs token = do
       .\/ Endpoint "add tokens" Integer
       .\/ Endpoint "buy tokens" Integer
       .\/ Endpoint "withdraw" (Integer, Integer)
- --| Start endpint calls startTS with Nothing (has to be minted), wrap in handleError (log Error)    
+      
+ --| Start endpoint calls startTS with Nothing (has to be minted), wrap in handleError (log Error)    
   startEndpoint :: Contract (Last TokenSale) TSStartSchema Text ()
   startEndpoint = startTS' >> startEndpoint
     where
