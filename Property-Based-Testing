@@ -1,33 +1,6 @@
+data TSState = TSState
+  { _tssPrice    :: !Integer
+  , _tssLovelace :: !Integer
+  , _tssToken    :: !Integer
+  } deriving Show
 
-module Week08.QuickCheck where
-
-import Test.QuickCheck
-
-simple_prop :: Bool
-simple_prop = 2 + 2 == (4 :: Int)
-
-
--- Insertion sort code
-
--- | Sort a list of integers in ascending order.
---
--- >>> sort [5,1,9]
--- [1,5,9]
---
-sort :: [Int] -> [Int] -- not correct
-sort []     =  []
-sort (x:xs) =  insert x xs
-
--- | Insert an integer at the right position into an /ascendingly sorted/
--- list of integers.
---
--- >>> insert 5 [1,9]
--- [1,5,9]
---
-insert :: [Int] -> [Int] -> [Int] -- not correct
-insert x []                       =  [x]
-insert x (y:ys)    | x <= y       =  x  : ys
-                   | otherwise    =  y  : insert x ys
-                   
-reverseSort :: [Int] -> [Int]
-reverseSort = reverse . sort
