@@ -3,4 +3,39 @@ data TSState = TSState
   , _tssLovelace :: !Integer
   , _tssToken    :: !Integer
   } deriving Show
+  
+makeLenses ''TSState
 
+newtype TSModel = TSModel {_tsModel :: Map Wallet TSState}
+    deriving Show
+    
+makeLenses ''TSModel
+
+tests :: TestTree
+tests = testProperty "token sale model" prop_TS
+
+instance ContractModel TSModel where
+
+   data Action TSModel =
+             Start Wallet
+           | SetPrice Wallet Wallet Integer
+           | AddTokens Wallet Wallet Integer
+           | Withdraw Wallet Wallet Integer Integer
+           | BuyTokens Wallet Wallet Integer
+       deriving (Show, Eq)
+       
+   data ContractInstanceKey TSModel w s e where
+       StartKey :: Wallet           -> ContractInstanceKey TSModel (Last TokenSale) TSStartSchema' Text
+       UseKey   :: Wallet -> Wallet -> ContractInstanceKey TsModel ()
+       
+   instanceTag key _ = fromString $ "instance tag for: " ++ show key
+   
+   arbitraryAction _ = oneof $ 
+       (Start <$> genWallet) :
+       [ SetPrice  <$> genWallet <*> genWallet <*> genNonNeg ]               ++
+       [ AddTokens <$> genWallet <*> genWallet <*> genNonNeg ]               ++
+       [ BuyTokens <$> genWallet <*> genWallet <*> genNonNeg ]               ++
+       [ Withdraw  <$> genWallet <*> genWallet <*> genNonNeg <*> genNonNeg ]
+   
+   initialState = TSModel Map.empty
+   
