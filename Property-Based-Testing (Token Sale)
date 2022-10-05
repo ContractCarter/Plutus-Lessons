@@ -45,5 +45,14 @@ instance ContractModel TSModel where
        wait 1
        
    nextState (SetPrice v w p) = do
-       whem (v == w) $
+       when (v == w) $
+           (tsModel . ix v . tssPrice) $= p
+       wait 1
+     
+   nextState (AddTokens v w n) = do
+       started <- hasStarted v                                    -- has the token sale started?
+       when (n > 0 && started) $ do
+           bc <- askModelState $ view $ balanceChange  w
+           let token = tokens Map.! v
+           when (tokenAmt + assetClassValueOf bc token >= n ) $ do -- does the wallet have the tokens to give?
     
