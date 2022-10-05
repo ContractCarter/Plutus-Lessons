@@ -39,3 +39,11 @@ instance ContractModel TSModel where
    
    initialState = TSModel Map.empty
    
+   nextState (Start w) = do
+       withdraw w $ nfts Map.! w
+       (tsModel . at w) $= Just (TSState 0 0 0)
+       wait 1
+       
+   nextState (SetPrice v w p) = do
+       whem (v == w) $
+    
