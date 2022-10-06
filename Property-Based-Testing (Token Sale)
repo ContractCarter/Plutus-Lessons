@@ -55,4 +55,15 @@ instance ContractModel TSModel where
            bc <- askModelState $ view $ balanceChange  w
            let token = tokens Map.! v
            when (tokenAmt + assetClassValueOf bc token >= n ) $ do -- does the wallet have the tokens to give?
+               withdraw w $ assetClassValue token n
+               (tsModel . ix v . tssToken) $- (+ n)
+        wait 1
+        
+   nextState (BuyTokens v w n) = do
+       when (n > 0) $ do
+           m <- getTSState v
+           case m of
+               Just t
+                   |  t ^. tssToken >= n -> do
+                        let p = t ^. tssPrice
     
