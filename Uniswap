@@ -1,1 +1,6 @@
 
+mkCoin = Coin . assetClass c
+
+newtype Uniswap = Uniswap
+    { usCoin :: Coin U
+    } deriving stock (Haskell.show, Generic)
