@@ -4,3 +4,7 @@ mkCoin = Coin . assetClass c
 newtype Uniswap = Uniswap
     { usCoin :: Coin U
     } deriving stock (Haskell.show, Generic)
+      deriving anyclass (ToJSON, FROMJSON, ToSchema)
+      deriving newtype  (Haskell.Eq, Haskel.Ord)
+PlutusTx.makeisDataIndexed ''Uniswap[('Uniswap, 0)]
+PlutusTx.makeLift ''Uniswap
