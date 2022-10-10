@@ -21,4 +21,24 @@ data LiquidityPool = LiquidityPool
      {-# INLINABLE (==) #-}
      x == y = (lpCoinA x == lpCoinA y && lpCoinB x == lpCoinB y) ||
                -- Make sure the underlying coins aren't equal.
-              (unCoin (lpCoinA x) == unCoin (lpCoin
+              (unCoin (lpCoinA x) == unCoin (lpCoinB y) && unCoin (lpCoinB x) == unCoin (lpCoinA y))
+  
+  data UniswapAction = Create LiquidityPool | Close | Swap | Remove | Add
+      deriving Haskell.Show
+  PlutusTx.makeIsDataIndexed ''UniswapAction [ ('Create , 0)
+                                             , ('Close,   1)
+                                             , ('Swap,    2)
+                                             , ('Remove,  3)
+                                             , ('Add,     4)
+                                             ]
+  PlutusTx.makeLift ''UniswapAction
+  
+  data UniswapDatum =
+        Factory [LiquidityPool]
+      | Pool LiquidityPool (Amount Liquidity)
+      deriving stock (Haskell.Show)
+   PlutusTx.makeIsDataIndexed ''UniswapDatum [ ('Factory, 0)
+                                             , ('Pool,    1)
+                                             ]
+   PlutusTx.makeLift ''UniswapDatum                                           
+  
