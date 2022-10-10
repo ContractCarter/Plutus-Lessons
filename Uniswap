@@ -8,3 +8,17 @@ newtype Uniswap = Uniswap
       deriving newtype  (Haskell.Eq, Haskel.Ord)
 PlutusTx.makeisDataIndexed ''Uniswap[('Uniswap, 0)]
 PlutusTx.makeLift ''Uniswap
+
+data LiquidityPool = LiquidityPool
+    { lpCoinA :: Coin A
+    , lpCoinB :: Coin B
+    }
+    deriving (Haskell.Show, Generic, ToJSON, FromJSON, ToSchema)
+ PlutusTx.makeIsDataIndexed ''LiquidityPool [('LiquidityPool, 0)]
+ PlutusTx.makeLift ''LiquidityPool 
+ 
+ instance Eq LiquidityPool where
+     {-# INLINABLE (==) #-}
+     x == y = (lpCoinA x == lpCoinA y && lpCoinB x == lpCoinB y) ||
+               -- Make sure the underlying coins aren't equal.
+              (unCoin (lpCoinA x) == unCoin (lpCoin
