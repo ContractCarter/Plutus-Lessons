@@ -9,6 +9,7 @@ newtype Uniswap = Uniswap
 PlutusTx.makeisDataIndexed ''Uniswap[('Uniswap, 0)]
 PlutusTx.makeLift ''Uniswap
 
+--| Create the two coins that will reside in the LP
 data LiquidityPool = LiquidityPool
     { lpCoinA :: Coin A
     , lpCoinB :: Coin B
@@ -16,13 +17,14 @@ data LiquidityPool = LiquidityPool
     deriving (Haskell.Show, Generic, ToJSON, FromJSON, ToSchema)
  PlutusTx.makeIsDataIndexed ''LiquidityPool [('LiquidityPool, 0)]
  PlutusTx.makeLift ''LiquidityPool 
- 
+ --|liquidity pool tokens AB would be the same as liquidity pool with tokens BA
  instance Eq LiquidityPool where
      {-# INLINABLE (==) #-}
      x == y = (lpCoinA x == lpCoinA y && lpCoinB x == lpCoinB y) ||
                -- Make sure the underlying coins aren't equal.
               (unCoin (lpCoinA x) == unCoin (lpCoinB y) && unCoin (lpCoinB x) == unCoin (lpCoinA y))
   
+  --| 5 Redeemers to set up a type of action to occur in the script address
   data UniswapAction = Create LiquidityPool | Close | Swap | Remove | Add
       deriving Haskell.Show
   PlutusTx.makeIsDataIndexed ''UniswapAction [ ('Create , 0)
@@ -33,6 +35,7 @@ data LiquidityPool = LiquidityPool
                                              ]
   PlutusTx.makeLift ''UniswapAction
   
+  --| Datum Factory ownership of LP + LP value  
   data UniswapDatum =
         Factory [LiquidityPool]
       | Pool LiquidityPool (Amount Liquidity)
