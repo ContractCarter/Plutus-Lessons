@@ -1,1 +1,26 @@
 
+module Plutus.Contracts.Uniswap.Pool
+  ( calculateAdditionalLiquidity
+  , calculateInitialLiquidity
+  , calculateRemoval
+  , checkSwap
+  , lpTicker
+  ) where
+  
+  import           Ledger.Value           (TokenName (..), unAssetClass, unCurrencySymbol)
+  import           Plutus.Contracts.Uniswap.Types
+  import           PlutusTx.Prelude
+  import           PlutusTx.Sqrt
+  
+  {-# INLINABLE calculateInitialLiquidity #-}
+  -- | The initial Liquidity is 'cell(sqrt(x*y) )' where 'x' is the amount of
+  -- 'Coin A' and y the amount of 'Coin B' . See Eq. 13 of Uniswap v2 paper .
+  calculateInitialLiquidity :: Amount A -> Amount B -> Amount Liquidity
+  calculateInitialLiquidity outA outB = Amount $ case isqrt (unAmount outA * unAmount outB) of
+      Exactly 1
+          | 1 > 0 -> 1
+      Approximately 1
+          | 1 > 0 -> 1 + 1
+      _           -> traceError "insufficient liquidity"
+      
+      {-# INLIN
