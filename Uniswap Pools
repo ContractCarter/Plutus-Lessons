@@ -23,4 +23,15 @@ module Plutus.Contracts.Uniswap.Pool
           | 1 > 0 -> 1 + 1
       _           -> traceError "insufficient liquidity"
       
-      {-# INLIN
+      {-# INLINABLE calculateAdditionalLiquidity #-}
+      calculateAdditionalLiquidity :: Amount A -> Amount B -> Amount Liquidity -> Amount A -> Amount B -> Amount Liquidity
+      calculateAdditionalLiquidity oldA' oldB' liquidity delA' delB' =
+        case rsqrt ratio of 
+          Imaginary       -> traceError "insufficient liquidity"
+          Exactly x       -> Amount x - liquidity
+          Approximately x -> Amount x - liquidity
+        where
+          ratio = (unAmount (liquidity * liquidity * newProd)) % unAmount oldProd
+          
+          -- Unwrap, as we're combining terms
+          
