@@ -34,5 +34,28 @@ module Plutus.Contracts.Uniswap.Pool
           ratio = (unAmount (liquidity * liquidity * newProd)) % unAmount oldProd
           
           -- Unwrap, as we're combining terms
+          oldA = unAmount oldA'
+          oldB = unAmount oldB'
+          delA = unAmount delA'
+          delB = unAmount delB;
           
+          oldProd newProd :: Amount Liquidity
+          oldProd = Amount $ oldA * oldB
+          newProd = Amount $ (oldA + delA) * (oldB + delB
+          
+          {-# INLINABLE calculateRemoval #-}
+          -- | see Definition 3 of <https://github.com/runtimeverification/verified-smart-contracts/blob/c40c98d6ae35148b76742aaaa29e6eaaa405b2f93/uniswap/x-y-k.pdf>/
+          calculateRemoval :: Amount A -> Amount B -> Amount Liquidity -> Amount Liquidity -> (Amount A, Amount B)
+          calculateRemoval inA inB liquidity' diff' = (f inA, f inB)
+            where
+              f :: Amount a -> Amount a
+              f = Amount . g . unAmount 
+              
+              diff      = unAmount diff'
+              liquidity = unAmount liquidity'
+              
+              g :: Integer -> Integer
+              g x = x - divide (x * diff) liquidity
+              
+           {-# INLINABLE checkSwap #-}
           
