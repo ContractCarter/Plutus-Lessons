@@ -92,5 +92,14 @@ module Plutus.Contracts.Uniswap.Pool
           lpTicker :: LiquidityPool -> TokenName 
           lpTicker LiquidityPool{..} = TokenName hash
               where
-                cA
-           
+                cA@(csA, tokA) = unAssetClass (unCoin lpCoinA)
+                cB@(csB, tokB) = unAssetClass (unCoin lpCoinB)
+                ((x1, y1), (x2, y2))
+                | cA < cB     = ((csA, tokA), (csBm tokB))
+                | otherwise   = ((csB, tokB), (csA, tokA))
+                
+              h1     = sha2_256 $unTokenName y1
+              h2     = sha2_256 $unTokenName y2
+              h3     = sha2_256 $unCurrencySymbol x1
+              h4     = sha2_256 $unCurrencySymbol x2
+              hash   = sha2_256 $h1 <> h2 <> h3 <> h4
