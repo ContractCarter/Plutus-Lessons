@@ -69,5 +69,28 @@ module Plutus.Contracts.Uniswap.Pool
               traceIfFalse "expected product to increase"
                   ((((newA * feeDen) - (inA * feeNum)) * ((newB * feeDen) - (inB * feeNum)))
                     >= (feeDen * feeDen * oldA * oldB)
-                    
-          {-# INLINABLE check     
+           where
+           -- Unwrap; because we are mixing terms.
+           oldA = unAmount oldA'
+           oldB = unAmount oldB'
+           newA = unAmount newA'
+           newB = unAmount newB'
+           
+           inA = max 0 $ newA - oldA
+           inB = max 0 $ newB - oldB
+           -- The uniswap fee is 0.3%; here it is multiplied by 1000, so that the 
+           -- on-chain code deals only in integers.
+           -- See: <https://uniswap.org/whitepaper.pdf> Eq (11) (Page 7.)
+           feeNum, feeDen :: Integer
+           feeNum = 3
+           feeDen = 1000
+           
+          {-# INLINABLE lpTicker #-}
+          -- | Generate a unique Token name for this particular pool; based on the
+          -- tokens it exchanges. This should be such that looking for a pool exchanging 
+          -- any two tokens always yields a unique name
+          lpTicker :: LiquidityPool -> TokenName 
+          lpTicker LiquidityPool{..} = TokenName hash
+              where
+                cA
+           
