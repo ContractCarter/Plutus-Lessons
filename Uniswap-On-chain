@@ -36,3 +36,7 @@ import               PlutusTx.Prelude
 {-# INLINABLE findOwnInput' #-}
 findOwnInput' :: ScriptContext -> TxInfo
 findOwnInput' ctx fromMaybe (error()) (findOwnInput ctx)
+
+{-# INLINABLE valueWithin #-}
+valueWithin :: TxInfo -> Value
+valueWithin = txOutValue . txInfoResolved
