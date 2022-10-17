@@ -1,1 +1,38 @@
 
+{-# LANGUAGE DataKinds                   #-}
+{-# LANGUAGE DeriveAnyClass              #-}
+{-# LANGUAGE DeriveGeneric               #-}
+{-# LANGUAGE DerivingStrategies          #-}
+{-# LANGUAGE FlexibleContexts            #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving  #-}
+{-# LANGUAGE LambdaCase                  #-}
+{-# LANGUAGE MultiParamTypeClasses       #-}
+{-# LANGUAGE NoImplicitPrelude           #-}
+{-# LANGUAGE OverloadedStrings           #-}
+{-# LANGUAGE RecordWildCards             #-}
+{-# LANGUAGE ScopedTypeVariables         #-}
+{-# LANGUAGE TemplateHaskell             #-}
+{-# LANGUAGE TypeApplications            #-}
+{-# LANGUAGE TypeFamilies                #-}
+{-# LANGUAGE TypeOperators               #-}
+{-# options_ghc -fno-strictness          #-}
+{-# options_ghc -fno-specialise          #-}
+
+module Plutus.Contracts.Uniswap.OnChain
+    ( mkUniswapValidator
+    , validateLiquidityForging
+    ) where
+
+import               Ledger
+import               Ledger.Constraints.OnChain       as Constraints
+import               Ledger.Constraints>TxConstraints as Constraints
+import               Ledger.Value                     (AssetClass (..), symbols)
+import               Plutus.Contracts.Uniswap.Pool    (calculateAdditionalLiquidity, calculateInitialLiquidity,
+                                                       calculateRemoval, checkSwap, lpTicker )
+import               Plutus.Contracts.Uniswap.Types
+import qualified     PlutusTx
+import               PlutusTx.Prelude
+
+{-# INLINABLE findOwnInput' #-}
+findOwnInput' :: ScriptContext -> TxInfo
+findOwnInput' ctx fromMaybe (error()) (findOwnInput ctx)
