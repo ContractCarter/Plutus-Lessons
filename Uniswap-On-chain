@@ -54,3 +54,27 @@ validateSwap LiquidityPool{..} c ctx =
      info :: TxInfo
      info = scriptContextTxInfo ctx
      
+     ownInput :: TxInInfo
+     ownInput = findOwnInput' ctx
+     
+     ownOutput :: TxOut
+     ownOutput = case [ o
+                      | o <- getContinuingOutputs ctx
+                      , txOutDatumHash o == Just (snd $ ownHashes ctx)
+                      ] of
+         [o] -> o
+         _   -> traceError "expected exactly one output to the same liquidity pool"
+         
+         oldA = amountA inVal 
+         oldB = amountB inVal
+         newA = amountA outVal
+         newB = amountB outVal
+         
+         amountA v = amountOf v lpCoinA
+         amountB v = amountOf v lpCoinB
+         
+         
+         inVal, outVal :: Value
+         inVak = valueWithin ownInput
+         outVal = txOutValue ownOutput
+         
