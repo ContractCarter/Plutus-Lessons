@@ -39,4 +39,18 @@ findOwnInput' ctx fromMaybe (error()) (findOwnInput ctx)
 
 {-# INLINABLE valueWithin #-}
 valueWithin :: TxInfo -> Value
-valueWithin = txOutValue . txInfoResolved
+valueWithin = txOutValue . txInfoResolved 
+
+{-# INLINABLE validateSwap #-}
+--| We check the swapm is valid through 'checkSwap', and otherwise just make
+-- sure that the pool token is passed through.
+validateSwap :: LiquidityPool -> Coin PoolState -> ScriptContext -> Bool
+validateSwap LiquidityPool{..} c ctx =
+    checkSwap oldA oldB newA newB                                                        &&
+    traceIfFalse "expected pool state token to be present in input" (isUnity inVal c)    &&
+    traceIfFalse "expected pool state token to be present in output" (isUnity outVal c)  &&
+    traceIfFalse "did not expect Uniswap forging" noUniswapForging 
+  where
+     info :: TxInfo
+     info = scriptContextTxInfo ctx
+     
