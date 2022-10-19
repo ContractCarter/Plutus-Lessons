@@ -127,4 +127,6 @@ validateSwap LiquidityPool{..} c ctx =
        
        forged :: Value
        forged = txInfoForge $ scriptContextTxinfo ctx
-                
+       
+       liquidityCoin' :: Coin Liquidity
+       liquidityCoin' = let AssetClass (cs,_) = unCoin c in mkCoin cs $ lpTicker lp
