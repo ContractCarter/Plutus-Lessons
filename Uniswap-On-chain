@@ -104,6 +104,27 @@ validateSwap LiquidityPool{..} c ctx =
                   -> LiquidityPool
                   -> ScriptContext
                   -> Bool
-   validateCreate Uniswap {..} c lps lp@LiquidityPool{..} ctx =
-       traceifFalse
+   validateCreate Uniswap {..} c lps lp@LiquidityPool{..} ctx =  
+       traceifFalse "Uniswap coin not present" (isUnity (valueWithin $ findOwnInput' ctx) usCoin)         && -- 1,
+       Constraints.checkOwnOutputConstraint ctx (OutputConstraint (Factory $ lp : lps) $ unitValue usCoin)&& -- 2,
+       (unCoin lpCoinA /= unCoin lpCoinB)                                                                 && -- 3,
+       all (/= lp) lps                                                                                    && -- 4,
+       isUnity forged c                                                                                   && -- 5,
+       (amountOf forged liquidityCoin' == liquidiity)                                                     && -- 6,
+       (outA > 0)                                                                                         && -- 7,
+       (outB > 0)                                                                                         && -- 8,
+       Constraints.checkOwnOutputConstraint ctx (OutputConstraint (Pool lp liquidity) $
+           valueOf lpCoinA outA <> valueOf lpCoinB outB <> unitValue c)
+     where
+       poolOutput :: TxOut
+       poolOutput = case [o | o <- getContinuingOutputs ctx, isUnity (txOutValue o) c] of
+           [o] -> o
+           _   -> traceError "expected exactly one pool output"
+       
+       outA       = amountOf (txOutValue poolOutput) lpCoinA
+       outB       = amountOf (txOutValue poolOutput) lpCoinB
+       liquidity  = calculateInitialLiquidity outA outB
+       
+       forged :: Value
+       forged = txInfoForge $ scriptContextTxinfo ctx
                 
