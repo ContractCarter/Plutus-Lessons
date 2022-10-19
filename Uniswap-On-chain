@@ -85,3 +85,25 @@ validateSwap LiquidityPool{..} c ctx =
               forged             = txInfoForge info
              in
               all (/= cs) $ symbols forged
+   
+   {INLINABLE validateCreate #-}
+   --| This validates the creation of a liquidity pool to exchange coins. In order to be 
+   -- valid,
+   --
+   -- 1, 2, We need to be dealing with the Uniswap coin,
+   -- 3, We have to exchanging different coins,
+   -- 4, The pool can't already exist,
+   -- 5, The pool needs a single value as output,
+   -- 6, The liquidity amount needs to be as-determined by 'calculateInitialLiquidity'
+   --     (i.e. the amount from the Uniswap V2 paper).
+   -- 7,8. We need to be exchanging more than zero of each kind of coin. 
+   -- 9.   It should output a pool with the determined properties
+   validateCreate :: Uniswap
+                  -> Coin PoolState
+                  -> [LiquidityPool]
+                  -> LiquidityPool
+                  -> ScriptContext
+                  -> Bool
+   validateCreate Uniswap {..} c lps lp@LiquidityPool{..} ctx =
+       traceifFalse
+                
