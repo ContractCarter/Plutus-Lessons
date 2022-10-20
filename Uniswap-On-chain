@@ -115,7 +115,7 @@ validateSwap LiquidityPool{..} c ctx =
        (outB > 0)                                                                                         && -- 8,
        Constraints.checkOwnOutputConstraint ctx (OutputConstraint (Pool lp liquidity) $
            valueOf lpCoinA outA <> valueOf lpCoinB outB <> unitValue c)
-     where
+     wheresnd
        poolOutput :: TxOut
        poolOutput = case [o | o <- getContinuingOutputs ctx, isUnity (txOutValue o) c] of
            [o] -> o
@@ -131,4 +131,16 @@ validateSwap LiquidityPool{..} c ctx =
        liquidityCoin' :: Coin Liquidity
        liquidityCoin' = let AssetClass (cs,_) = unCoin c in mkCoin cs $ lpTicker lp
        
+       {-# INLINABLE validateCloseFactory #-}
+    -- | See 'Plutus.Contracts.Uniswap.OffChain.close'.
+    validateCloseFactory :: Uniswap -> Coin PoolState -> [LiquidityPool] -> ScriptContext -> Bool
+    validateCloseFactory Uniswap{..} c lps ctx =
+        traceIfFalse "Uniswap coin not present" (isUnity (valueWithin $ findOwnInput' ctx) usCoin)                              && -- 1.
+        traceIfFalse "wrong forge value"        (txInfoForge info == negate (unitValue c <> valueOf lC (snd lpLiquidity)))      && -- 2.
+        traceIfFalse "factory output wrong"                                                                                        -- 3.
+            (Constraints.checkOwnOutputConstraint ctx $ OutputConstraint (Factory $ filter (/= fst lpLiquidity) lps) $ unitValue usCoin)
+        where
+          info :: TxInfo
+          info = scriptContextTxInfo ctx
+        
        
