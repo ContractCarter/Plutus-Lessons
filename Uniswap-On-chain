@@ -130,3 +130,5 @@ validateSwap LiquidityPool{..} c ctx =
        
        liquidityCoin' :: Coin Liquidity
        liquidityCoin' = let AssetClass (cs,_) = unCoin c in mkCoin cs $ lpTicker lp
+       
+       
