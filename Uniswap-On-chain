@@ -158,5 +158,18 @@ validateSwap LiquidityPool{..} c ctx =
                  
                  LC :: Coin Liquidity
                  LC = let AssetClass (cs, _) = unCoin c in mkCoin cs (lpTicker $ lpLiquidity)
+                 
+           {-# INLINABLE validateClosePool #-}
+           -- | See 'Plutus.Contracts.Uniswap.OffChain.close'
+           validateClosePool :: Uniswap -> ScriptContext -> Bool
+           validateClosePool us ctx = hasFactoryInput 
+             where
+               info :: TxInfo
+               info = scriptContextTxInfo ctx 
+               
+               hasFactoryInput :: Bool
+               hasFactoryInput =
+                   traceIfFalse "Uniswap factory input expected" $
+                   isUnity (valueSpent info) (usCoin us)
         
        
