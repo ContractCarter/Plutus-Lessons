@@ -142,5 +142,21 @@ validateSwap LiquidityPool{..} c ctx =
         where
           info :: TxInfo
           info = scriptContextTxInfo ctx
+          
+          poolInput :: TxInInfo
+          poolInput = case [ i
+                           | i <- txInfoInputs info
+                           , isUnity (valueWithin i) c
+                           ] of
+             [i] -> i
+             _   -> traceError "expected exactly one pool input"
+             
+             lpLiquidity :: (LiquidityPool, Amount Liquidity)
+             lpLiquidity = case txOutDatumHash , txInInfoResolved $ poolInput of
+                 Nothing -> traceError "pool input witness missing"
+                 just h  -> findPoolDatum info h
+                 
+                 LC :: Coin Liquidity
+                 LC = let AssetClass (cs, _) = unCoin c in mkCoin cs (lpTicker $ lpLiquidity)
         
        
