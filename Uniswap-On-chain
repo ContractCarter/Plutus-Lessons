@@ -172,4 +172,32 @@ validateSwap LiquidityPool{..} c ctx =
                    traceIfFalse "Uniswap factory input expected" $
                    isUnity (valueSpent info) (usCoin us)
         
+        {-# INLINABLE validateRemove #-}
+        -- | See 'Plutus.Contracts.Uniswap.OffChain.remove'
+        validateRemove :: Coin PoolState -> LiquidityPool -> Amount Liquidity -> ScriptContext -> Bool
+        validateRemove c lp liquidity ctx =
+            traceIfFalse "zero removal"                        (diff > 0)                                      &&
+            traceIfFalse "removal of too much liquidity"       (diff < liquidity)                              &&
+            traceIfFalse "pool state coin missing"             (isUnity inVal c)                               &&
+            traceIfFalse "wrong liquidity pool output"         (fst lpLiquidity == lp)                         &&
+            traceIfFalse "pool state coin missing from output" (isUnity outVal c)                              &&
+            traceIfFalse "liquidity tokens not burnt"          (txInfoForge info == negate (valueOf LC diff))  &&
+            traceIfFalse "non-positive liquidity"              (outA > 0 && outB > 0)
+          where
+            info :: TxInfo
+            info = findOwnInput' ctx
+            
+            ownInput :: TxInfo
+            ownInput = findOwnInput' ctx
+            
+            output :: TxOut
+            output = case getContinuingOutputs ctx of
+                [o] -> o
+                _   -> traceError "expected exactly one Uniswap output"
+                
+            inVal, outVal :: Value
+            inVal  = valueWithin ownInput
+            outVal = txOutValue output 
+            
+        
        
