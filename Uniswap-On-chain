@@ -199,5 +199,20 @@ validateSwap LiquidityPool{..} c ctx =
             inVal  = valueWithin ownInput
             outVal = txOutValue output 
             
+            lpLiquidity :: (LiquidityPool, Amount Liquidity)
+            lpLiquidity = case txOutDatumHash output of
+                Nothing -> traceError "pool output witness missings"
+                 Just h -> findPoolDatum info h
+                 
+            LC :: Coin Liquidity
+            LC = let AssetClass (cs, _) = unCoin c in mkCoin cs (lpTicker lp)
+            
+            diff         = liquidity - snd lpLiquidity
+            inA          = amountOf inVal $ lpCoinA lp
+            inB          = amountOf inVal $ lpCoinB lp
+            (outA, outB) = calculateRemoval inA inB liquidity diff
+           
+      {-# INLINABLE validateAdd #-}
+            
         
        
