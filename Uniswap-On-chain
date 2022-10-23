@@ -213,6 +213,22 @@ validateSwap LiquidityPool{..} c ctx =
             (outA, outB) = calculateRemoval inA inB liquidity diff
            
       {-# INLINABLE validateAdd #-}
-            
+      -- | See 'Plutus.Contracts.Uniswap.OffChain.add'.
+      validateAdd :: Coin PoolState -> LiquidityPool -> Amount Liqidity -> ScriptContext -> Bool
+      validateAdd c lp liquidity ctx =
+          traceIfFalse "pool state token missing from input"         (isUnity inVal c)                                                    &&
+          traceIfFalse "output pool for same liquidity pair expected (lp == fst OutDatum)                                                 &&
+          traceIfFalse "must not remove tokens"                      (delA >= 0 && delB >= 0)                                             &&
+          traceIfFalse "insufficient liquidity"                      (delL >= 0)                                                          &&
+          traceIfFalse "wrong amount of liquidity tokens"            (delL == calculateAdditionalLiquidity oldA oldB liquidity delA delB) &&
+          traceIfFalse "wrong amount of liquidity tokens forged"     (txInfoForge info == valueOf LC delL)
+        where
+          info :: TxInfo
+          info = scriptContextTxInfo ctx
+          
+          ownInput :: TxInInfo
+          ownInput = findOwnInput' ctx
+          
+          ownOutput :: TxOut
         
        
