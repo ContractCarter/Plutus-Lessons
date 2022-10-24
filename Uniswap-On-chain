@@ -258,7 +258,40 @@ validateSwap LiquidityPool{..} c ctx =
           LC :: Coin Liquidity
           LC = let AssetClass (cs, _) = unCoin c in mkCoin cs $ lpTicker lp
           
-             
+      {-# INLINABLE findPoolDatum #-}
+      findPoolDatum :: TxInfo -> DatumHash -> (LiquidityPool, Amount Liquidity)
+      findPoolDatum info h = case findDatum h info of
+           Just (Datum d) -> case PlutusTx.fromData d of
+                Just (Pool lp a) -> (lp, a)
+                _                -> traceError "error decoding data"
+           _               -> traceError "pool input datum not found"
+      
+      {-# INLINABLE mkUniswapValidator #-}
+      mkUniswapValidator :: Uniswap
+                         -> Coin PoolState
+                         -> UniswapDatum
+                         -> UniswapAction
+                         -> ScriptContext
+                         -> Bool
+      mkUniswapValidator us c (Factory lps) (Create lp) ctx = validateCreate us c lps lp ctx
+      mkUniswapValidator _  c (Pool lp _)   Swap        ctx = validateSwap lp c ctx
+      mkUniswapValidator us c (Factory lps) Close       ctx = validateCloseFactory us c lps ctx
+      mkUniswapValidator us _ (Pool _ _ )   Close       ctx = validateClosePool us ctx
+      mkUniswapValidator _  c (Pool lp a)   Remove      ctx = validateRemove c lp a ctx
+      mkUniswapValidator _  c (Pool lp a)   Add         ctx = validateAdd c lp a ctx
+      mkUniswapValidator _  _ _             _           _   = False
+      
+      {-# INLINABLE validateLiquidityForging #-}
+       validateLiquidityForging :: Uniswap -> TokenName -> ScriptContext -> Bool
+       validateLiquidityForging Uniswap{..} tn ctx
+          = case [ i
+                 | i <- txInfoInputs $ scriptContextTxInfo ctx
+                 , let v = valueWithin i
+                 , isUnity v usCoin || isUnity v lpC
+                 ] of
+            [_]    -> True
+            [_, _] -> True
+            _      -> traceError "pool state forging without Uniswap input"
              
         
        
