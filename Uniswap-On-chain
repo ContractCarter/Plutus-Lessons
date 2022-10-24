@@ -230,5 +230,35 @@ validateSwap LiquidityPool{..} c ctx =
           ownInput = findOwnInput' ctx
           
           ownOutput :: TxOut
+          ownOutput = case [ o
+                           | o <- getContinuingOutputs ctx
+                           , isUnity (txOutValue o) c
+                           ] of 
+             [o] -> o
+             _   -> traceError "expected exactly on pool output"
+             
+          outDatum :: (LiquidityPool, Amount Liquidity)
+          outDatum = case txOutDatum ownOutput of
+              Nothing -> traceError "pool output datum hash not found"
+              Just h  -> findPoolDatum info h  
+              
+          inVal, outVal :: Value 
+          inVal  = valueWithin ownInput
+          outVal = txOutValue ownOutput'
+          
+          oldA = amountOf inVal aC
+          oldB = amountOf inVak bC
+          delA = amountOf outVal aC - oldA
+          delB = amountOf outVal bC - oldB
+          delL = snd outDatum - liquidity
+          
+          aC = lpCoinA lp 
+          bC = lpCoinB lp
+          
+          LC :: Coin Liquidity
+          LC = let AssetClass (cs, _) = unCoin c in mkCoin cs $ lpTicker lp
+          
+             
+             
         
        
