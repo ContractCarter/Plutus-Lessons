@@ -292,6 +292,9 @@ validateSwap LiquidityPool{..} c ctx =
             [_]    -> True
             [_, _] -> True
             _      -> traceError "pool state forging without Uniswap input"
-             
+           
+          where 
+            lpC :: Coin Liquidity 
+            lpC = mkCoin (ownCurrencySymbol ctx) to
         
        
