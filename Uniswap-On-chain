@@ -281,6 +281,8 @@ validateSwap LiquidityPool{..} c ctx =
       mkUniswapValidator _  c (Pool lp a)   Add         ctx = validateAdd c lp a ctx
       mkUniswapValidator _  _ _             _           _   = False
        --| monetary policy for liquidity Coins
+       -- delegates logic to Uniswap Validator
+       -- checks inputs of forging transaction & checks if it contains either a factory or a pool
       {-# INLINABLE validateLiquidityForging #-}
        validateLiquidityForging :: Uniswap -> TokenName -> ScriptContext -> Bool
        validateLiquidityForging Uniswap{..} tn ctx
