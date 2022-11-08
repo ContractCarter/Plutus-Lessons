@@ -1,1 +1,20 @@
 
+module Week07.Test where
+
+import            Control.Monad              hiding (fmap)
+import            Control.Monad.Freer.Extras as Extras
+import            Data.Default               (Default (..))
+import qualified  Data.Map                   as Map
+import            Ledger
+import            Ledger.TimeSlot
+import            Ledger.Value
+import            Ledger.Ada                 as Ada
+import            Plutus.Trace.Emulator      as Emulator
+import            PlutusTx.Prelude
+import            Prelude                    (IO, Show (..))
+import            Wallet.Emulator.Wallet
+
+import            Week07.EvenOdd
+
+test :: IO ()
+test = do
