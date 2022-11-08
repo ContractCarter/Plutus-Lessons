@@ -18,3 +18,28 @@ import            Week07.EvenOdd
 
 test :: IO ()
 test = do
+    test' Zero Zero
+    test' Zero One
+    test' One Zero
+    test' One One 
+    
+ test' :: GameChoice -> GameChoice -> IO ()
+ test' c1 c2 = runEmulatorTraceIO' def emCfg def $ myTrace c1 c2
+   where
+     emCfg :: EmulatorConfig
+     emCfg = EmulatorConfig $ Left $ Map.fromList
+         [ (Wallet 1, v <> assetClassValue (AssetClass (gameTokenCurrency, gameTokenName)) 1)
+         , (Wallet 2, v)
+         ]
+         
+      v :: Value
+      v = Ada.lovelaceValueOf 1_000_000_000
+      
+  gameTokenCurrency :: CurrencySymbol
+  gameTokenCurrency = "ff"
+  
+  gameTokenName :: TokenName
+  gameTokenName = "STATE TOKEN"
+
+  myTrace :: GameChoice -> GameChoice -> EmulatorTrace ()
+  myTrace c1 c2 = do
