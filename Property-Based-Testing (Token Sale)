@@ -31,7 +31,12 @@ instance ContractModel TSModel where
            | Withdraw Wallet Wallet Integer Integer
            | BuyTokens Wallet Wallet Integer
        deriving (Show, Eq)
-       
+    
+   -- GADT Data Types
+   -- providing constructors with type signatures
+   -- associate data type  
+   -- A key that identifies the instance of each contract
+   -- ContractInstance Key holds a constructor StartKey takes wallet as argument -> type
    data ContractInstanceKey TSModel w s e where
        StartKey :: Wallet           -> ContractInstanceKey TSModel (Last TokenSale) TSStartSchema' Text
        UseKey   :: Wallet -> Wallet -> ContractInstanceKey TsModel ()
