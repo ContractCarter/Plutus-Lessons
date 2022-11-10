@@ -1,3 +1,6 @@
+-- define data type representing token instance
+--  3 fields
+-- current price, current lovelace, current supply token
 data TSState = TSState
   { _tssPrice    :: !Integer
   , _tssLovelace :: !Integer
@@ -5,18 +8,22 @@ data TSState = TSState
   } deriving Show
   
 makeLenses ''TSState
-
+-- boilerplate model
+-- TSModel is a map from wallets to TokenSale states
 newtype TSModel = TSModel {_tsModel :: Map Wallet TSState}
     deriving Show
     
+-- create lenses for the model
 makeLenses ''TSModel
 
 tests :: TestTree
 tests = testProperty "token sale model" prop_TS
 
 instance ContractModel TSModel where
+-- Action Type (what QuickCheck generates)
 --| Start TokenSale Contract 
--- 2nd wallet starts
+-- one Constructor in Action type for each endpoint
+-- arguments = Wallets to keep track of to perform actions
    data Action TSModel =
              Start Wallet
            | SetPrice Wallet Wallet Integer
