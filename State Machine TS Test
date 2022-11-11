@@ -44,3 +44,4 @@ test = do
 
   myTrace :: GameChoice -> GameChoice -> EmulatorTrace ()
   myTrace c1 c2 = do
+  Extras.logInfo $ "first move: " ++ show c1 ++", second move: " ++ show c2
