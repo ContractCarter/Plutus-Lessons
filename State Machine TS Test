@@ -46,9 +46,13 @@ test = do
   myTrace c1 c2 = do
   Extras.logInfo $ "first move: " ++ show c1 ++", second move: " ++ show c2
   
+  -- start 2 instances of endpoints contact (wallet 1 + wallet 2)
   h1 <- activateContractWallet (Wallet 1) endpoints
   h2 <- activateContractWallet (Wallet 2) endpoints
   
+  -- lookup pubkeyhash
   let pkh1 = pubKeyHash $ walletPubKey $ Wallet 1
       pkh2 = pubKeyHash $ walletPubKey. $ Wallet 2
-  
+      
+  -- find params wallets will use    
+  
