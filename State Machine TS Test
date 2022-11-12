@@ -45,3 +45,10 @@ test = do
   myTrace :: GameChoice -> GameChoice -> EmulatorTrace ()
   myTrace c1 c2 = do
   Extras.logInfo $ "first move: " ++ show c1 ++", second move: " ++ show c2
+  
+  h1 <- activateContractWallet (Wallet 1) endpoints
+  h2 <- activateContractWallet (Wallet 2) endpoints
+  
+  let pkh1 = pubKeyHash $ walletPubKey $ Wallet 1
+      pkh2 = pubKeyHash $ walletPubKey. $ Wallet 2
+  
