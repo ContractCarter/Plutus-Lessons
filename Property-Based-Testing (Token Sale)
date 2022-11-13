@@ -86,15 +86,20 @@ instance ContractModel TSModel where
     
     t ^. tssToken >= n -> do
     
+    -- check current price + calculate # requested tokens will cost
     let p = t ^. tssPrice
     l = p * n
     
+    -- withdraw = wallet losing lovelace
+    -- deposit = gaining tokens 
     withdraw w $ lovelaceValueOf l
     deposit w $ assetClassValue (tokens Map.! v) n
     
+    
     (tsModel . ix v . tssLovelace) $- (+ l)
     (tsModel . ix v . tssToken)    $- (+ (-n))
-    
+    -- wait for a slotModel 
+    -- Withdraw action
     nextState (Withdraw v w n l) = do
     when (v == w) $ do
         m <- getTSState v
