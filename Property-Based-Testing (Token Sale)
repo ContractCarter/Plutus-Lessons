@@ -80,3 +80,29 @@ instance ContractModel TSModel where
                    |  t ^. tssToken >= n -> do
                         let p = t ^. tssPrice
     
+    m <- getTSState v
+    case m of 
+        Just t
+    
+    t ^. tssToken >= n -> do
+    
+    let p = t ^. tssPrice
+    l = p * n
+    
+    withdraw w $ lovelaceValueOf l
+    deposit w $ assetClassValue (tokens Map.! v) n
+    
+    (tsModel . ix v . tssLovelace) $- (+ l)
+    (tsModel . ix v . tssToken)    $- (+ (-n))
+    
+    nextState (Withdraw v w n l) = do
+    when (v == w) $ do
+        m <- getTSState v
+        case m of
+            Just t
+                | t ^. tssToken >= n && t ^. tssLovelace >= l -> do
+                    deposit w $ lovelaceValueOf l <> assetClassValue (tokens Map.! w) n
+                    (tsModel . ix v . tssLovelace) $- (+(-l))
+                    (tsModel . ix v . tssToken) $- (+ (-n))
+            _ -> return ()
+     wait 1       
