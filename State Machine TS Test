@@ -55,4 +55,22 @@ test = do
       pkh2 = pubKeyHash $ walletPubKey. $ Wallet 2
       
   -- find params wallets will use    
-  
+  fp = FirstParams
+          { fpSecond            = pkh2
+          , fpStake             = 5000000
+          , fpPlayDeadline      = 5
+          , fpRevealDeadline    = 10
+          , fpNonce             = "SECRETNONCE"
+          , fpCurrency          = gameTokenCurrency
+          , fpTokenName         = gameTokenName
+          , fpChoice            = c1
+          }
+   sp = SecondParams
+           { spFirst            = pkh1
+           , spStake            = 5000000
+           , spPlayDeadline     = 5
+           , spRevealDeadline   = 10
+           , spCurrency         = gameTokenCurrency
+           , spTokenName        = gameTokenName
+           , spChoice           = c2
+           }
