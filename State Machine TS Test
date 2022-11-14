@@ -74,3 +74,10 @@ test = do
            , spTokenName        = gameTokenName
            , spChoice           = c2
            }
+callEndpoint @"first" h1 fp
+
+void $ Emulator.waitNSlots 3
+
+callEndpoint @"second" h2 sp
+
+void $ Emulator.waitNSlots 10
