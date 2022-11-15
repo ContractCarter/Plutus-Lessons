@@ -41,7 +41,8 @@ test = do
   
   gameTokenName :: TokenName
   gameTokenName = "STATE TOKEN"
-
+  
+-- pass two game choices into my trace function
   myTrace :: GameChoice -> GameChoice -> EmulatorTrace ()
   myTrace c1 c2 = do
   Extras.logInfo $ "first move: " ++ show c1 ++", second move: " ++ show c2
@@ -74,6 +75,8 @@ test = do
            , spTokenName        = gameTokenName
            , spChoice           = c2
            }
+
+-- call endpoints
 callEndpoint @"first" h1 fp
 
 void $ Emulator.waitNSlots 3
