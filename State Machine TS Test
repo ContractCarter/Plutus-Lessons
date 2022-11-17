@@ -16,8 +16,10 @@ import            Wallet.Emulator.Wallet
 
 import            Week07.EvenOdd
 
--- testfunction takes the first and second players' choices
+-- testfunction test 4 of the possible choices 1st & 2nd player can make
 -- testfunction uses runEmulatorTraceIO, setting up wallet distributions using EmulatorConfig
+-- call a test NFT out of thin air
+test :: IO ()
 test = do
     test' Zero Zero
     test' Zero One
