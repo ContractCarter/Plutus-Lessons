@@ -54,7 +54,18 @@ module Plutus.Contracts.Uniswap.OffChain
      type instance RedeemerType Uniswapping = UniswapAction
      type instance DatumType    Uniswapping = UniswapDatum
  
- 
- 
- 
+ type UniswapOwnerSchema =
+     BlockchainActions
+         ./\ Endpoint "start" ()
+         
+ type UniswapUserSchema = 
+     BlockchainActions
+         .\/ Endpoint "create" CreateParams
+         .\/ Endpoint "swap"   SwapParams
+         .\/ Endpoint "close"  CloseParams
+         .\/ Endpoint "remove" RemoveParams
+         .\/ Endpoint "add"    AddParams
+         .\/ Endpoint "pools" ()
+         .\/ Endpoint "funds" ()
+         .\/ Endpoint "stop"  ()
  
