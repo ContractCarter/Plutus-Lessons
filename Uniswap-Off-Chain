@@ -28,4 +28,33 @@ module Plutus.Contracts.Uniswap.OffChain
     , ownerEndpoint, userEndpoints
     ) where
     
- import   
+ import           Control.Monad                      hiding (fmap)  
+ import qualified Data.Map                           as Map
+ import           Data.Monoid                        (Last (..))
+ import           Data.Proxy                         (Proxy (..))
+ import           Data.Text                          (Text, pack)
+ import           Data.Void                          (Void)
+ import           Ledger                             hiding (singleton)
+ import           Ledger.Constraints                 as Constraints
+ import qualified Ledger.Typed.Scripts               as Scripts
+ import           Playground.Contract
+ import           Plutus.Contract                    hiding (when)
+ import qualified Plutus.Contract.Currency           as Currency
+ import           Plutus.Contracts.Uniswap.OnChain   (mkUniswapValidator, validateLiquidityForging)
+ import           Plutus.Contracts.Uniswap.Pool
+ import           Plutus.Contracts.Uniswap.Types
+ import qualified PlutusTx
+ import           PlutusTx.Prelude                    hiding (Semigroup (..), dropWhile, flip, unless)
+ import           Prelude                             as Haskell (Int, Semigroup (..), String, div, dropWhile, flip, show,
+ 
+ import           Text.Printf                         (printf)
+ 
+ data Uniswapping
+ instance Scripts.ScriptType Uniswapping where
+     type instance RedeemerType Uniswapping = UniswapAction
+     type instance DatumType    Uniswapping = UniswapDatum
+ 
+ 
+ 
+ 
+ 
