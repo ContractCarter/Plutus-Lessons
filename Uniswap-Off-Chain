@@ -54,10 +54,13 @@ module Plutus.Contracts.Uniswap.OffChain
      type instance RedeemerType Uniswapping = UniswapAction
      type instance DatumType    Uniswapping = UniswapDatum
  
+--| define two Schemas
+--  Creates Uniswap Factory
  type UniswapOwnerSchema =
      BlockchainActions
          ./\ Endpoint "start" ()
          
+ --|Create and manage Liquidity Pool        
  type UniswapUserSchema = 
      BlockchainActions
          .\/ Endpoint "create" CreateParams
@@ -71,20 +74,23 @@ module Plutus.Contracts.Uniswap.OffChain
          
 -- | Type of the Uniswap user contract state.
 data UserContractState =
-      Pools [((Coin A, Amount A), (Coin B, AmountB))]
+      Pools [((Coin A, Amount A), (Coin B, Amount B))]
     | Funds Value
     | Created
     | Swapped
     | Added
-    | Remove
+    | Removed
     | Close
     | Stopped
     deriving (Show, Generic, FromJSON, ToJSON)
     
+--| UniswapTokenName = Factory NFT
+-- poolStateTokenName = Liquidity Pool Coins NFT
 uniswapTokenName, poolStateTokenName :: TokenName
 uniswapTokenName = "Uniswap"
 poolStateTokenName = "Pool State"
 
+--| Script Instance Boiler Plate
 uniswapInstance :: Uniswap -> Scripts.ScriptInstance Uniswapping
 uniswapInstance us = Scripts.validator @Uniswapping
     ($$(PlutusTx.compile [|| mkUniswapValidator ||])
@@ -96,3 +102,20 @@ uniswapInstance us = Scripts.validator @Uniswapping
        c = poolStateCoin us
        
        wrap = Scripts.wrapValidator @UniswapDatum @UniswapAction
+
+uniswapScript :: Uniswap -> Validator
+uniswapScript = Scripts.validatorScript . uniswapInstance
+
+uniswapAddress :: Uniswap -> Ledger.Address
+uniswapAddress = Ledger.scriptAddress . uniswapScript
+
+uniswap :: CurrencySymbol -> Uniswap
+uniswap cs = Uniswap $ mkCoin cs uniswapTokenName
+
+liquidityPolicy :: Uniswap -> MonetaryPolicy
+liquidityPolicy us = mkMonetaryPolicyScript $
+    $$(PlutusTx.compile [|| \u t -> Scripts.wrapMonetaryPolicy (validateLiquidityForging u t) ||])
+        'PlutusTx.applyCode' PlutusTx.liftCode us
+        'PlutusTx.applyCode' PlutusTx.liftCode poolStateTokenName
+        
+        32:31
