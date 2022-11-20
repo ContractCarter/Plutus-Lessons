@@ -68,4 +68,31 @@ module Plutus.Contracts.Uniswap.OffChain
          .\/ Endpoint "pools" ()
          .\/ Endpoint "funds" ()
          .\/ Endpoint "stop"  ()
- 
+         
+-- | Type of the Uniswap user contract state.
+data UserContractState =
+      Pools [((Coin A, Amount A), (Coin B, AmountB))]
+    | Funds Value
+    | Created
+    | Swapped
+    | Added
+    | Remove
+    | Close
+    | Stopped
+    deriving (Show, Generic, FromJSON, ToJSON)
+    
+uniswapTokenName, poolStateTokenName :: TokenName
+uniswapTokenName = "Uniswap"
+poolStateTokenName = "Pool State"
+
+uniswapInstance :: Uniswap -> Scripts.ScriptInstance Uniswapping
+uniswapInstance us = Scripts.validator @Uniswapping
+    ($$(PlutusTx.compile [|| mkUniswapValidator ||])
+        'PlutusTx.applyCode' PlutusTx.liftCode us
+        'PlutusTx.applyCode' PlutusTx.liftCode c)
+     $$(PlutusTx.compile [|| wrap ||])
+     where
+       c :: Coin PoolState
+       c = poolStateCoin us
+       
+       wrap = Scripts.wrapValidator @UniswapDatum @UniswapAction
