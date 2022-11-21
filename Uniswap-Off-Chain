@@ -127,6 +127,6 @@ liquidityPolicy us = mkMonetaryPolicyScript $
  --| Gets the 'Coin' used to identity liquidity pools.
  poolStateCoinFromUniswapCurrency :: CurrencySymbol  -- ^ The currency identifying the Uniswap instance.
                                   -> Coin PoolState
- poolStateCoinFromUniswapCurrency = poolStateCoin . uniswap=                                 
+ poolStateCoinFromUniswapCurrency = poolStateCoin . uniswap                                 
 
 3220
