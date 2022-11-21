@@ -117,5 +117,16 @@ liquidityPolicy us = mkMonetaryPolicyScript $
     $$(PlutusTx.compile [|| \u t -> Scripts.wrapMonetaryPolicy (validateLiquidityForging u t) ||])
         'PlutusTx.applyCode' PlutusTx.liftCode us
         'PlutusTx.applyCode' PlutusTx.liftCode poolStateTokenName
-        
-        32:31
+ 
+ liquidityCurrency :: Uniswap -> CurrencySymbol
+ liquidityCurrency = scriptCurrencySymbol . liquidityPolicy
+ 
+ poolStateCoin :: Uniswap -> Coin PoolState
+ poolStateCoin = flip mkCoin poolStateTokenName . liquidityCurrency
+ 
+ --| Gets the 'Coin' used to identity liquidity pools.
+ poolStateCoinFromUniswapCurrency :: CurrencySymbol  -- ^ The currency identifying the Uniswap instance.
+                                  -> Coin PoolState
+ poolStateCoinFromUniswapCurrency = poolStateCoin . uniswap=                                 
+
+3220
