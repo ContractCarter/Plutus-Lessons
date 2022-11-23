@@ -111,7 +111,7 @@ uniswapAddress = Ledger.scriptAddress . uniswapScript
 
 uniswap :: CurrencySymbol -> Uniswap
 uniswap cs = Uniswap $ mkCoin cs uniswapTokenName
-
+ 
 liquidityPolicy :: Uniswap -> MonetaryPolicy
 liquidityPolicy us = mkMonetaryPolicyScript $
     $$(PlutusTx.compile [|| \u t -> Scripts.wrapMonetaryPolicy (validateLiquidityForging u t) ||])
@@ -129,4 +129,11 @@ liquidityPolicy us = mkMonetaryPolicyScript $
                                   -> Coin PoolState
  poolStateCoinFromUniswapCurrency = poolStateCoin . uniswap                                 
 
-3220
+--| Gets the liquidity token for a given liquidity pool.
+liquidityCoin :: CurrencySymbol -- ^ The currency identifying the Uniswap instance.
+              -> Coin A         -- ^ One coin in the liquidity pair.
+              -> Coin B         -- ^ The other coin in the liquidity pair.
+liquidityCoin cs coinA coinB = mkCoin (liquidityCurrency $ uniswap cs) $ lpTicker $ LiquidityPool coinA coinB
+
+--| All parameters for the five endpoints
+
