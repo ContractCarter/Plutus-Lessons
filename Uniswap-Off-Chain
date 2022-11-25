@@ -148,10 +148,22 @@ data SwapParams = SwapParams
     , spCoinB   :: Coin B       -- ^ The other 'Coin'
     , spAmountA :: Amount A     -- ^ The amount the first 'Coin' that should be swapped
     , spAmountB :: Amount B     -- ^ The amount of the second 'Coin' that should be swapped
-    } deriving (Show, Generic, ToJSON, FromJSON, To
-    , spAmountB :: Amount B 
+    } deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
 
 data CloseParams = CloseParams
     { clpCoinA :: Coin A
     , clpCoinB :: Coin B
     }deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
+
+data RemoveParams = RemoveParams
+    { rpCoinA :: Coin A
+    , rpCoinB :: Coin B
+    , rpDiff  :: Amount Liquidity
+    } deriving (Show, Generic, TOJSON, FromJSON, ToSchema)
+    
+data AddParams = AddParams
+    { apCoinA   :: Coin A
+    , apCoinB   :: Coin B
+    , apAmountA :: Amount A
+    , apAmountB :: Amount B
+    } deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
