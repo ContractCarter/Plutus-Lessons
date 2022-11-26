@@ -167,3 +167,21 @@ data AddParams = AddParams
     , apAmountA :: Amount A
     , apAmountB :: Amount B
     } deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
+
+-- | Creates a Uniswap "factory". This factory will keep track of existing liquidity pools and enforce that there will be at most one liquidity pool
+-- for any pair of tokens at any given time.
+start :: HasBlockchainActions s => Contract w s Text Uniswap
+start = do
+     pkh <- pubKeyHash <$> ownPubKey
+     cs  <- fmap Currency.currencySymbol $
+            mapError (pack . show @Currency.CurrencyError) $
+            Currency.forgeContract pkh [(uniswapTokenName, 1)]
+     let c    = mkCoin cs uniswapTokenName
+         us   = uniswap cs
+         inst = uniswapInstance us
+         tx   = mustPayToTheScript (Factory []) $ unitValue c
+      ledgerTx <- submitTxConstraints inst tx
+      void $ awaitTxConfirmed $ txId ledgerTx
+      
+      logInfo @String $ printf "started Uniswap %s at address %$" (show us) (show $ uniswapAddress us)
+      return us
