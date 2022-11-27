@@ -201,3 +201,16 @@ start = do
            lC       = mkCoin (liquidityCurrency us) $ lpTicker lp
            usVal    = unitValue $ usCoin us
            lpVal    = valueOf cpCoinA cpAmountA <> valueOf cpCoinB cpAmountB <> unitValue psC
+           
+           lookups  = Constraints.scriptInstanceLookups usInst        <>
+                      Constraints.otherScript usScript                <>
+                      Constraints.monetaryPolicy (liquidityPolicy us) <>
+                      Constraints.unspentOutputs (Map.singleton oref o)
+                      
+           tx       = Constraints.mustPayToTheScript usDat1 usVal                                <>
+                      Constraints.mustPayToTheScript usDat1 lpVal                                <>
+                      Constraints.mustForgeValue (unitValue psC <> valueOf LC liquidity)         <>
+                      Constraints.mustSpendScriptOutput oref (Redeemer $ PlutusTx.toData $ Create lp)
+           
+           ledgerTx <- submitTxConstraintsWith lookups tx
+           void $ awaitTxConfirmed $ txId ledgerTx
