@@ -185,3 +185,19 @@ start = do
       
       logInfo @String $ printf "started Uniswap %s at address %$" (show us) (show $ uniswapAddress us)
       return us
+      
+  create :: HasBlockchainActions s => Uniswap -> CreateParams -> Contract w s Text ()
+  create us CreateParams{..} = do
+      when (unCoin cpCoinA == unCoin cpCoinB) $ throwError "coins must be different"
+      when (cpAmountA <= 0 || cpAmountB <= 0) $ throwError "amounts must be positive"
+       (oref, o, lps) <- findUniswapFactory us
+       let liquidity = calculateInitialLiquidity cpAmountA cpAmountB
+           lp        = LiquidityPool {lpCoinA = cpCoinA, lpCoinB = cpCoinB}
+       let usInst   = uniswapInstance us
+           usScript = uniswapScript us
+           usDat1   = Factory $ lp : lps
+           usDat2   = Pool lp liquidity
+           psC      = poolStateCoin us
+           lC       = mkCoin (liquidityCurrency us) $ lpTicker lp
+           usVal    = unitValue $ usCoin us
+           lpVal    = valueOf cpCoinA cpAmountA <> valueOf cpCoinB cpAmountB <> unitValue psC
