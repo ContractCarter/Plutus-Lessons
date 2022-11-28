@@ -214,3 +214,35 @@ start = do
            
            ledgerTx <- submitTxConstraintsWith lookups tx
            void $ awaitTxConfirmed $ txId ledgerTx
+           
+     close :: HasBlockchainActions s => Uniswap -> CloseParams -> Contract w s Text ()
+     close us CloseParams{..} = do
+         ((oref1, o1, lps), (oref2, o2, lp, liquidity)) <- findUniswapFactoryAndPool us clpCoinA clpCoinB
+         pkh                                            <- pubKeyHash <$> ownPubKey
+         let usInst   = uniswapInstance us
+             usScript = uniswapScript us
+             usDat    = Factory $ filter (/= lp) lps
+             usC      = usCoin us
+             psC      = poolStateCoin us
+             lC       = mkCoin (liquidityCurrency us) $ lpTicker lp
+             usVal    = unitValue usC
+             psVal    = unitValue psC
+             lVal     = valueOf lC liquidity
+             redeemer = Redeemer $ PlutusTx.toData Close
+             
+             lookups  = Constraints.scriptInstanceLookups usInst         <>
+                        Constraints.otherScript usScript                 <>
+                        Constraints.monetaryPolicy (liquidityPolicy us)  <>
+                        Constraints.ownPubKeyHash pkh                    <>
+                        Constraints.unspentOutputs (Map.singleton oref1 o1 <> Map.singleton oref2 o2)
+                        
+              tx      = Constraints.mustPayToTheScript usDat usVal          <>
+                        Constraints.mustForgeValue (negate $ psVal <> lVal) <>
+                        Constraints.mustSpendScriptOutput oref1 redeemer    <>
+                        Constraints.mustSpendScriptOutput oref2 redeemer    <>
+                        Constraints.mustIncludeDatum (Datum $ PlutusTx.toData $ Pool lp liquidity)
+                        
+              ledgerTx <- submitTxConstraintsWith lookups tx
+              void $ awaitTxConfirmed $ txId ledgerTx
+              
+              loginfo $ "closed liquidity pool: " ++ show lp
