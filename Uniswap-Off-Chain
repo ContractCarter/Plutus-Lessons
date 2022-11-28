@@ -229,7 +229,12 @@ start = do
              psVal    = unitValue psC
              lVal     = valueOf lC liquidity
              redeemer = Redeemer $ PlutusTx.toData Close
-             
+      
+      remove :: HasBlockchainActions s => Uniswap -> RemoveParams -> Contract w s Text ()
+      remove us RemoveParams{..} = do
+          (_, (oref, o, lp, liquidity)) <- findUniswapFactoryAndPool us rpCoinA rpCoinB
+          pkh                           <- pubKeyHash <$> ownPubKey
+          when (rpDiff
              lookups  = Constraints.scriptInstanceLookups usInst         <>
                         Constraints.otherScript usScript                 <>
                         Constraints.monetaryPolicy (liquidityPolicy us)  <>
