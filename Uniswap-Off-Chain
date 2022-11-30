@@ -281,3 +281,17 @@ start = do
          
          logInfo $ "removed liquidity from pool: " ++ show lp 
          
+         
+      add :: HasBlockchainActions s => Uniswap -> AddParams -> Contract w s Text ()
+      add us AddParams{..} = do
+          pkh                           <- pubKeyHash <$> ownPubKey
+          (_, (oref, o, lp, liquidity)) <- findUniswapFactoryAndPool us apCoinA apCoinB
+          when (apAmountA < 0 || apAmountB < 0) $ throwError "amounts must not be negative"
+          let outVal = txOutValue $ txOutTxOut o
+          oldA       = amountOf outVal apCoinA
+          oldB       = amountOf outVal apCoinB
+          newA       = oldA + apAmountA
+          newB       = oldB + apAmountB
+          delL       = calculateAdditionalLiquidity oldA oldB liquidity apAmountA apAmountB
+          inVal      = valueOf apCoinA apAmountA <> valueOf apCoinB apAmountB
+      when (delL <= 0) $ throwError "insufficient liquidity"
