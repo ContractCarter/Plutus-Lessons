@@ -295,3 +295,31 @@ start = do
           delL       = calculateAdditionalLiquidity oldA oldB liquidity apAmountA apAmountB
           inVal      = valueOf apCoinA apAmountA <> valueOf apCoinB apAmountB
       when (delL <= 0) $ throwError "insufficient liquidity"
+      logInfo @String $printf "oldA = %d, oldB = %d, newA = %d, newB = %d, delL = %d" oldA oldB newA newB delL
+      
+      let usInst       = uniswapInstance us
+          usScript     = uniswapScript us
+          dat          = Pool lp $ liquidity + delL
+          psC          = poolStateCoin us
+          lC           = mkCoin (liquidityCurrency us) $ lpTicker lp
+          psVal        = unitValue psC
+          lVal         = valueOf lC delL
+          val          = psVal <> valueOf apCoinA newA <> valueOf apCoinB newB
+          redeemer     = Redeemer $ PlutusTx.toData Add
+          
+          lookups  = Constraints.scriptInstanceLookups usInst           <>
+                     Constraints.otherScript usScript                   <>
+                     Constraints.monetaryPolicy (liqudityPolicy us)     <>
+                     Constraints.ownPubKeyHash pkh                      <>
+                     Constraints.unspentOutputs (Map.singleton oref o)
+                     
+          tx       = Constraints.mustPayToTheScript dat val          <>
+                     Constraints.mustForgeValue (negate lVal)        <>
+                     Constraints.mustSpendScriptOutput oref redeemer
+                     
+    ledgerTx <- submitTxConstraintsWith lookups tx
+    void $ awaitTxConfirmed $ txId ledgerTx
+    
+    logInfo $ "removed liquidity from pool: " ++ show lp
+           
+ 
