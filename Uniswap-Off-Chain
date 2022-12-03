@@ -281,7 +281,7 @@ start = do
          
          logInfo $ "removed liquidity from pool: " ++ show lp 
          
-         
+     -- | Adds some liquidity to an existing liquidity pool in exchange for newly minted liquidity tokens.    
       add :: HasBlockchainActions s => Uniswap -> AddParams -> Contract w s Text ()
       add us AddParams{..} = do
           pkh                           <- pubKeyHash <$> ownPubKey
@@ -313,13 +313,7 @@ start = do
                      Constraints.ownPubKeyHash pkh                      <>
                      Constraints.unspentOutputs (Map.singleton oref o)
                      
-          tx       = Constraints.mustPayToTheScript dat val          <>
-                     Constraints.mustForgeValue (negate lVal)        <>
-                     Constraints.mustSpendScriptOutput oref redeemer
-                     
-    ledgerTx <- submitTxConstraintsWith lookups tx
-    void $ awaitTxConfirmed $ txId ledgerTx
-    
-    logInfo $ "removed liquidity from pool: " ++ show lp
-           
+          tx       = Constraints.mustPayToTheScript dat val            <>
+                     Constraints.mustForgeValue lVal                   <>
+                     Constraints.mustSpendScriptOutput oref redeemer 
  
