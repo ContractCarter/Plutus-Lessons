@@ -316,4 +316,14 @@ start = do
           tx       = Constraints.mustPayToTheScript dat val            <>
                      Constraints.mustForgeValue lVal                   <>
                      Constraints.mustSpendScriptOutput oref redeemer 
- 
+  
+   logInfo @String $ printf "val = %s, inVal = %s" (show val) (show inVal)
+   logInfo $ show lookups 
+   logInfo $ show tx
+   
+   ledgerTx <- submitTxConstraintsWith lookups tx
+   void $ awaitTxConfirmed $ txId ledgerTx
+   
+   logInfo $ "added liquidity to pool: " ++ show lp
+   
+ -- | Uses a liquiidity pool two swap one sort of coins in the pool against the other .  
