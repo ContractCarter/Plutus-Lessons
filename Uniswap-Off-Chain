@@ -60,7 +60,8 @@ module Plutus.Contracts.Uniswap.OffChain
      BlockchainActions
          ./\ Endpoint "start" ()
          
- --|Create and manage Liquidity Pool        
+ --|Create and manage Liquidity Pool   
+ -- all contracts will parameterized by uniswap instance 1st action creates
  type UniswapUserSchema = 
      BlockchainActions
          .\/ Endpoint "create" CreateParams
@@ -281,7 +282,7 @@ start = do
          
          logInfo $ "removed liquidity from pool: " ++ show lp 
          
-     -- | Adds some liquidity to an existing liquidity pool in exchange for newly minted liquidity tokens.    
+     -- | Adds some liquidity( A + B) to an existing liquidity pool in exchange for newly minted liquidity tokens.    
       add :: HasBlockchainActions s => Uniswap -> AddParams -> Contract w s Text ()
       add us AddParams{..} = do
           pkh                           <- pubKeyHash <$> ownPubKey
@@ -326,4 +327,43 @@ start = do
    
    logInfo $ "added liquidity to pool: " ++ show lp
    
- -- | Uses a liquiidity pool two swap one sort of coins in the pool against the other .  
+ -- | Uses a liquiidity pool two swap one sort of coins in the pool against the other .
+ swap :: HasBlockchainActions s=> Uniswap -> SwapParams -> Contract w s Text ()
+ swap us SwapParams{..} = do
+     unless (spAmountA > 0 && spAmountB == 0 || spAmountA == 0 && spAmountB > 0) $ throwError "exactly one amount must be positive"
+     (_, (oref, o, lp, liquidity)) <- findUniswapFactoryAndPool us spCoinA spCoinB
+     let outVal = txOutValue $ txOutTxOut o
+     let oldA = amountOf outVal spCoinA
+         oldB = amountOf outVal spCoinB
+       (newA, newB) <- if spAmountA > 0 then do
+           let outB = Amount $ findSwapA oldA oldB spAmountA
+           when (outB == 0) $ throwError "no payout"
+           return (oldA + spAmountA, oldB - outB)
+                                        else do
+           let outA = Amount $ findSwapB oldA oldB spAmountB
+           when (outA == 0) $ throwError "no payout"
+           return (oldA + spAmountA, oldB - outB)
+                                        else do
+           let outA = Amount $ findSwapB oldA oldB spAmountB
+           when (outA == 0) $ throwError "no payout"
+           return (oldA - outA, oldB + spAmountB)
+       pkh <- pubKeyHash <$> ownPubKey
+       
+       logInfo @String $ printf "oldA = %d, oldB = %d, old product = %d, newA = %d, new product = %d"
+       
+       let inst    = uniswapInstance us
+           val     = valueOf spCoinA newA <> valueOf spCoinB newB <> unitValue (poolStateCoin us)
+           
+           lookups = Constraints.scriptInstanceLookups inst                 <>
+                     Constraints.otherScript (Scripts.validatorScript inst) <>
+                     Constraints.unspentOutputs (Map.singleton oref o)      <>
+                     Constraints.ownPubKeyHash pkh
+                     
+           tx      =  mustSpendScriptOutput oref (Redeemer $ PlutusTx.toData Swap) <>
+                      Constraints.mustPayToTheScript (Pool lp liquidity) val
+           
+       logInfo $ show tx
+       ledgerTx <- submitTxConstraintsWith lookups tx
+       logInfo $ show ledgerTx
+       void $ awaitTxConfirmed $ txId ledgerTx
+       logInfo $ "swapped with: " ++ show lp
