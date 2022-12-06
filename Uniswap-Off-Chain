@@ -367,3 +367,31 @@ start = do
        logInfo $ show ledgerTx
        void $ awaitTxConfirmed $ txId ledgerTx
        logInfo $ "swapped with: " ++ show lp
+       
+ pools :: forall w s. HasBlockchainActions s => Uniswap -> Contract w s Text [((Coin A, Amount A), (Coin B, Amount B))]
+ pools us = do
+     utxos <- utxoAt (uniswapAddress us)
+     go $ snd <$> Map.toList utxos
+   where
+     go :: [TxOutTx] -> Contract w s Text [((Coin A, Amount A), (Coin B, Amount B))]
+     go []       = return []
+     go (o : os) = do
+         let v = txOutValue $ txOutTxOut o
+         if isUnity v c
+             then do
+                 d <- getUniswapDatum o
+                 case d of
+                     Factory _ -> go os
+                     Pool lp _ -> do
+                         let coinA = lpCoinA lp
+                             coinB = lpCoinB lp
+                             amtA  = amountOf v coinA
+                             amtB  = amountOf v coinB
+                             s     = ((coinA, amtA), (coinB, amtB))
+                          logInfo $ "found pool: " ++ show s
+                          ss <- go os
+                          return $ s : ss
+              else go os
+        where
+          c :: Coin PoolState
+          c = poolStateCoin us
