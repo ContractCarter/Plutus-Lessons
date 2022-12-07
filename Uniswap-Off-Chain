@@ -134,9 +134,10 @@ liquidityPolicy us = mkMonetaryPolicyScript $
 liquidityCoin :: CurrencySymbol -- ^ The currency identifying the Uniswap instance.
               -> Coin A         -- ^ One coin in the liquidity pair.
               -> Coin B         -- ^ The other coin in the liquidity pair.
+              -> Coin Liquidity 
 liquidityCoin cs coinA coinB = mkCoin (liquidityCurrency $ uniswap cs) $ lpTicker $ LiquidityPool coinA coinB
 
---| All parameters for the five endpoints
+--| Parameters for the creating a new liquidity pool
 data CreateParams = CreateParams
     { cpCoinA   :: Coin A       -- ^ One 'Coin' of the liquidity pair
     , cpCoinB   :: Coin B       -- ^ The other 'Coin'
