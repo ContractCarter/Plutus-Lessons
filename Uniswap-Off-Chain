@@ -396,3 +396,10 @@ start = do
         where
           c :: Coin PoolState
           c = poolStateCoin us
+          
+-- | Gets the caller's funds.
+funds :: HasBlockchainActions s => Contract w s Text Value
+funds = do
+    pkh <- pubKeyHash <$> ownPubKey
+    os  <- map snd . Map.toList <$> utxoAt (pubKeyHashAddress pkh)
+    return $ mconcat [txOutValue $ txOutTxOut o | o <- os]
