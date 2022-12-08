@@ -403,3 +403,12 @@ funds = do
     pkh <- pubKeyHash <$> ownPubKey
     os  <- map snd . Map.toList <$> utxoAt (pubKeyHashAddress pkh)
     return $ mconcat [txOutValue $ txOutTxOut o | o <- os]
+    
+getUniswapDatum :: TxOutTx -> Contract w s Text UniswapDatum
+getUniswapDatum o = case txOutDatumHash $ txOutTxOut o of
+        Nothing -> throwError "datumHash not found"
+        Just h -> case Map.lookup h $ txData $ txOutTxTx o of
+            Nothing -> throwError "datum not found"
+            Just (Datum e) -> case PlutusTx.fromData e of
+                Nothing -> throwError "datum has wrong type"
+                Just d  -> return d
