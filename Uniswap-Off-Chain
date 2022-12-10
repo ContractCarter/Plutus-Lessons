@@ -412,3 +412,19 @@ getUniswapDatum o = case txOutDatumHash $ txOutTxOut o of
             Just (Datum e) -> case PlutusTx.fromData e of
                 Nothing -> throwError "datum has wrong type"
                 Just d  -> return d
+
+findUniswapInstance :: HasBlockchainActions s => Uniswap -> Coin b -> (UniswapDatum -> Maybe a) -> Contract w s Text (TxOutRef, TxoutTx, a)
+findUniswapInstance us c f = do
+    let addr = uniswapAddress us
+    logInfo @String $ printf "looking for Uniswap instance at address %s containing coin %s " (show addr) (show c)
+    utxos <- utxOAt addr
+    go  [x | x@(_, o) <- Map.toList utxos, isUnity (txOutValue $ txOutTxOut o) c]
+  where
+    go  [] = throwError "Uniswap instance not found"
+    go  ((oref, o) : xs) = do
+         d <- getUniswapDatum o
+         case f d of
+             Nothing -> go xs
+             Just a  -> do
+                 logInfo @String $ printf "found Uniswap instance with datum: %s" (show d)
+                 return (oref, o, a)
