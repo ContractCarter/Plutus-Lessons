@@ -428,3 +428,9 @@ findUniswapInstance us c f = do
              Just a  -> do
                  logInfo @String $ printf "found Uniswap instance with datum: %s" (show d)
                  return (oref, o, a)
+
+findUniswapFactory :: HasBlockchainActions s => Uniswap -> LiquidityPool -> Contract w s Text (TxOutRef, TxOutTx, [LiquidityPool])
+findUniswapFactory us@Uniswap{..} = findUniswapInstance us usCoin $ \case
+    Pool lp' l
+        | lp == lp' -> Just l
+    _               -> Nothing
