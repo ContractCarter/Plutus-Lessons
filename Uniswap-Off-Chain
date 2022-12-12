@@ -434,3 +434,17 @@ findUniswapFactory us@Uniswap{..} = findUniswapInstance us usCoin $ \case
     Pool lp' l
         | lp == lp' -> Just l
     _               -> Nothing
+
+findUniswapPool :: HasBlockchainActions s => Uniswap -> LiquidityPool -> Contract w s Text (TxOutRef, TxOutTx, Amount Liquidity)
+findUniswapPool us lp = findUniswapInstance us (poolStateCoin us) $ \case
+        Pool lp' l
+            | lp == lp' -> Just l
+        _               -> Nothing
+
+findUniswapFactoryAndPool :: HasBlockchainActions s
+                          => Uniswap
+                          -> Coin A
+                          -> Coin B
+                          -> Contract w s Text ( (TxOutRef, TxOutTx, [LiquidityPool])
+                                               , (TxOutRef, TxOutTx, LiquidityPool, Amount Liquidity)
+                                               )
