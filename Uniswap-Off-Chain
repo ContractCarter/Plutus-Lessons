@@ -448,3 +448,22 @@ findUniswapFactoryAndPool :: HasBlockchainActions s
                           -> Contract w s Text ( (TxOutRef, TxOutTx, [LiquidityPool])
                                                , (TxOutRef, TxOutTx, LiquidityPool, Amount Liquidity)
                                                )
+findSwapA :: Amount A -> Amount B -> Amount A -> Integer
+findSwapA oldA oldB inA
+    | ub' <= 1  = 0
+    | otherwise = go 1 ub'
+  where
+    cs :: Integer -> Bool
+    cs outB = checkSwap oldA oldB (oldA + inA) (oldB - Amount outB)
+    
+    ub' :: Integer
+    ub' = head $ dropWhile cs [2 ^ i | i <- [0 :: Int ..]]
+    
+    go :: Integer -> Integer -> Integer
+    go lb ub
+        | ub == (lb + 1) = lb
+        | otherwise      =
+      let 
+        m = div (ub + lb)2
+      in
+        if cs m then go m ub else go lb m
