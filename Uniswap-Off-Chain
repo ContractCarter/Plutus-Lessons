@@ -467,3 +467,15 @@ findSwapA oldA oldB inA
         m = div (ub + lb)2
       in
         if cs m then go m ub else go lb m
+
+findSwapB :: Amount A -> Amount B -> Amount B -> Integer
+findSwapB oldA oldB inB = findSwapA (switch oldB) (switch oldA) (switch inB)
+   where
+     switch = Amount . unAmount
+     
+ ownerEndpoint :: Contract (Last (Either Text Uniswap)) BlockchainActions Void ()
+ ownerEndpoint = do
+     e <- runError start
+     tell $ Last $ Just $ case e of
+         Left err -> Left err
+         Right us -> Right us
