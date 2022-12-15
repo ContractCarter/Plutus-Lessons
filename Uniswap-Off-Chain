@@ -137,7 +137,8 @@ liquidityCoin :: CurrencySymbol -- ^ The currency identifying the Uniswap instan
               -> Coin Liquidity 
 liquidityCoin cs coinA coinB = mkCoin (liquidityCurrency $ uniswap cs) $ lpTicker $ LiquidityPool coinA coinB
 
---| Parameters for the creating a new liquidity pool
+-- | All Parameters for Endpoints
+-- Parameters for the creating a new liquidity pool
 data CreateParams = CreateParams
     { cpCoinA   :: Coin A       -- ^ One 'Coin' of the liquidity pair
     , cpCoinB   :: Coin B       -- ^ The other 'Coin'
@@ -145,6 +146,7 @@ data CreateParams = CreateParams
     , cpAmountB :: Amount B     __ ^ The Amount of the second 'Coin' that should be swapped.
     } deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
     
+   
 data SwapParams = SwapParams
     { spCoinA   :: Coin A       -- ^ One 'Coin' of the liquidity pair.
     , spCoinB   :: Coin B       -- ^ The other 'Coin'
