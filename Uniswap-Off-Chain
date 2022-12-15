@@ -479,3 +479,30 @@ findSwapB oldA oldB inB = findSwapA (switch oldB) (switch oldA) (switch inB)
      tell $ Last $ Just $ case e of
          Left err -> Left err
          Right us -> Right us
+         
+userEndpoints :: Uniswap -> Contract (Last (Either Text UserContractState)) UniswapUserSchema Void ()
+userEndpoints us =
+    stop
+        'select'
+    ((f (Proxy @"create") (const Created) create                 'select'
+      f (Proxy @"swap")   (const Swapped) swap                   'select'
+      f (Proxy @"close")  (const Closed)  close                  'select'
+      f (Proxy @"remove") (const Removed) remove                 'select'
+      f (Proxy @"add")    (const Added)   add                    'select'
+      f (Proxy @"pools")  Pools           (\us' () -> pools us') 'select'
+      f (Proxy @"funds")  Funds           (\_us () -> funds))    >> userEndpoints us)
+   where
+     f :: forall l a p.
+          HasEndpoint l p UniswapUserSchema
+       => Proxy l
+       -> (a -> UserContractState)
+       -> (Uniswap -> p -> Contract (Last (Either Text UserContractState)) UniswapUserSchema Text a)
+       -> Contract (Last (Either Text UserContractState)) UniswapUserSchema Void ()
+     f _ g c = do
+         e <- runError $ do
+             p <- endpoint @l
+             c us p
+         tell $ Last $ Just $ case e of
+             Left err -> Left err
+             Right a  -> Right $ g a
+     
