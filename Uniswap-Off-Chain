@@ -153,21 +153,21 @@ data SwapParams = SwapParams
     } deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
 
 data CloseParams = CloseParams
-    { clpCoinA :: Coin A
-    , clpCoinB :: Coin B
+    { clpCoinA :: Coin A        -- ^ One 'Coin' of the liquidity Pair
+    , clpCoinB :: Coin B        -- ^ The other 'Coin
     }deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
 
 data RemoveParams = RemoveParams
-    { rpCoinA :: Coin A
-    , rpCoinB :: Coin B
-    , rpDiff  :: Amount Liquidity
+    { rpCoinA :: Coin A           -- ^ One 'Coin' of the liquidity pair.
+    , rpCoinB :: Coin B           -- ^ The other 'Coin' of the liquidity pair
+    , rpDiff  :: Amount Liquidity -- ^ The amount of liquidity tokens to burn in exchange for liquidity from the pool
     } deriving (Show, Generic, TOJSON, FromJSON, ToSchema)
     
 data AddParams = AddParams
-    { apCoinA   :: Coin A
-    , apCoinB   :: Coin B
-    , apAmountA :: Amount A
-    , apAmountB :: Amount B
+    { apCoinA   :: Coin A         -- ^ One 'Coin' of the liquidity pair
+    , apCoinB   :: Coin B         -- ^ The other 'Coin' of the liquidity pair
+    , apAmountA :: Amount A       -- ^ The amount of coins of the first kinf to add the pool
+    , apAmountB :: Amount B       -- ^ The amount of coins of the second kind to add to the pool
     } deriving (Show, Generic, ToJSON, FromJSON, ToSchema)
 
 -- | Creates a Uniswap "factory". This factory will keep track of existing liquidity pools and enforce that there will be at most one liquidity pool
