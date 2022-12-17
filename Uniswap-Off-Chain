@@ -512,3 +512,9 @@ userEndpoints us =
              Left err -> Left err
              Right a  -> Right $ g a
      
+    stop :: Contract (Last (Either Text UserContractState)) UniswapUserSchema Void ()
+    stop = do
+        e <- runError $ endpoint @"stop"
+        tell $ Last $ Just $ case e of
+            Left err -> Left err
+            Right () -> Right Stopped
