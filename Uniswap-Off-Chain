@@ -485,7 +485,17 @@ findSwapB oldA oldB inB = findSwapA (switch oldB) (switch oldA) (switch inB)
      tell $ Last $ Just $ case e of
          Left err -> Left err
          Right us -> Right us
-         
+
+--| Provides the following endpoints for users of a Uniswap instance:
+--
+--     [@create@]: Creates a liquidity pool for a pair of coins. The creator provides liquidity for both coins and gets liquidity tokens in return.
+--     [@swap@]: Uses a liquidity pool two swap one sort of coins in the pool against the other.
+--     [@close@]: Closes a liquidity pool by burning all remaining liquidity tokens in exchange for all liquidity remaining in the pool
+--     [@remove@]: Removes some liquidity from a liquidity pool in exchange for liquidity tokens.
+--     [@add@]: Adds some liquidity to an existing liquidity pool in exchange for newly minted liquidity tokens
+--     [@pools@]: Finds all liquidity poola and liquidity (inspects Blockchain, does not issue any transaction
+--     [@funds@]: Gets caller's funds (inspects Blockchain, does not issue any transaction
+--     [@stop@]: Stops contract
 userEndpoints :: Uniswap -> Contract (Last (Either Text UserContractState)) UniswapUserSchema Void ()
 userEndpoints us =
     stop
