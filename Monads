@@ -76,4 +76,6 @@ class Monad m where
    (>>)  :: m a -> m b        -> m b
    return ::  a               -> m a
    fail   :: String -> m a
+   
  
+Monoids is a class types that combines values, together with a value which doesn't do anything when you combine it with others 
