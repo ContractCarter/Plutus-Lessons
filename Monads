@@ -1,5 +1,9 @@
-Monads are pure functions that Manage side effects
 
+The creative act of designing software in a manner that controls complexity is the creative act of creating functions that can be combined
+Create complexity by starting simple
+
+
+Monads are pure functions that Manage side effects
 
 --|(>>=)         :: IO a            -> (a -> IO b)             -> IO b
 -- bindMaybe     :: Maybe a         -> (a -> Maybe b)          -> Maybe b
@@ -78,4 +82,5 @@ class Monad m where
    fail   :: String -> m a
    
  
-Monoids is a class types that combines values, together with a value which doesn't do anything when you combine it with others 
+Monoids is a collection of things + a rule  for combining the things
+That rule obeys some rules
