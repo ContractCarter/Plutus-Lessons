@@ -95,3 +95,9 @@ That rule obeys some rules
  -- Second rule is that Monoids must contain a special member that x combines with special member is always x & special member combined with x is x
  x + 12 = x
  12 + x = x
+
+--| Purpose of Contract Monad is define off-chain code that runs in wallet. 
+-- holds four type parameters
+
+newtype Contract w s e a = Contract { unContract :: Eff (ContractEffs w s e a) a }
+      deriving newtype (Functor, Applicative, Monad)
