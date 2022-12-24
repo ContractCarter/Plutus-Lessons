@@ -101,3 +101,10 @@ That rule obeys some rules
 
 newtype Contract w s e a = Contract { unContract :: Eff (ContractEffs w s e a) a }
       deriving newtype (Functor, Applicative, Monad)
+w - Writer Monad, write log messages 
+s -  describes blockchain capabilities, waiting slot, submit tx, wallet pub key, endpoint
+e - type of error messages monad can throw 
+a - is a result type
+
+myContract1 :: Contract () BlockchainActions Text ()
+myContract1 = Contract.logInfo @String "Hello from the contract!"
