@@ -140,8 +140,8 @@ outputDatum = case gameDatum ownOutput (`findDatum` info) of
     Nothing -> traceError "game output datum not found"
     Just d  -> d
     
---| check the hash of the nonce linked to GameChoice
--- helper function convert GameChoice to ByteSting Zero' & One'
+--| check the hash of the nonce linked to  Second Player's GameChoice
+-- helper function reveals 1st player's encrypted choice after 2nd player move
 checkNonce :: ByteString -> ByteString -> GameChoice -> Bool
 checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
   where
@@ -182,7 +182,7 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
    gameAddress :: Game -> Ledger.Address
    gameAddress = scriptAddress . gameValidator
   
-  --| find correct UTxO with NFT
+  --|helper function finds correct UTxO with NFT
    findGameOutput :: HasBlockchainActions s => Game -> Contract w s Text (Maybe (TxOutRef, TxOutTx GameDatum))
    findGameOutput game = do 
        utxos <- utxoAt $ gameAddress game 
@@ -209,7 +209,7 @@ checkNonce bs nonce cSecond = sha2_256 (nonce 'concatenate' cFirst) == bs
        } deriving (Show, Generic, FromJSON, ToJSON, ToSchema)
        
 --| Start of First player contract 
--- get firsr player pubKeyHash
+-- get first player pubKeyHash
 -- use game data type populate fields of game
 -- Value v is 1st player stake + NFT
 -- first player choice is encrypted
